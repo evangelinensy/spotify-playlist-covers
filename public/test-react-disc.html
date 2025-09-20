@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test React Disc Loading</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .disc-test {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #333;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test React Disc Loading</h1>
+        <p><strong>This tests the disc image as served by the React dev server</strong></p>
+        
+        <div class="test-section" id="test1">
+            <h3>Test 1: React Server Image (with cache bust)</h3>
+            <img id="reactImage" class="disc-test" alt="React Disc Image">
+            <p id="reactStatus">Loading...</p>
+        </div>
+
+        <div class="test-section" id="test2">
+            <h3>Test 2: Canvas Loading from React Server</h3>
+            <canvas id="canvasTest" class="disc-test" width="300" height="300"></canvas>
+            <p id="canvasStatus">Loading...</p>
+        </div>
+
+        <button onclick="testCompositor()">🧪 Test Image Compositor</button>
+        <div id="compositorResult"></div>
+    </div>
+
+    <script>
+        // Test 1: React server image with cache bust
+        const reactImage = document.getElementById('reactImage');
+        const reactStatus = document.getElementById('reactStatus');
+        const test1 = document.getElementById('test1');
+
+        // Add timestamp to bust cache
+        const timestamp = Date.now();
+        reactImage.src = `http://localhost:3000/disc-bg-new.png?t=${timestamp}`;
+
+        reactImage.onload = function() {
+            reactStatus.textContent = `✅ React server loaded! Size: ${reactImage.naturalWidth}x${reactImage.naturalHeight}`;
+            test1.className = 'test-section success';
+        };
+
+        reactImage.onerror = function() {
+            reactStatus.textContent = '❌ Failed to load from React server';
+            test1.className = 'test-section error';
+        };
+
+        // Test 2: Canvas loading
+        const canvas = document.getElementById('canvasTest');
+        const ctx = canvas.getContext('2d');
+        const canvasStatus = document.getElementById('canvasStatus');
+        const test2 = document.getElementById('test2');
+
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = function() {
+            ctx.drawImage(img, 0, 0, 300, 300);
+            canvasStatus.textContent = `✅ Canvas loaded from React! Size: ${img.naturalWidth}x${img.naturalHeight}`;
+            test2.className = 'test-section success';
+        };
+
+        img.onerror = function() {
+            canvasStatus.textContent = '❌ Failed to load in canvas from React server';
+            test2.className = 'test-section error';
+        };
+
+        img.src = `http://localhost:3000/disc-bg-new.png?t=${timestamp}`;
+
+        // Test compositor function
+        async function testCompositor() {
+            const resultDiv = document.getElementById('compositorResult');
+            resultDiv.innerHTML = '<p>🔄 Testing compositor...</p>';
+
+            try {
+                // Simulate the compositor loading the disc image
+                const discImg = new Image();
+                discImg.crossOrigin = 'anonymous';
+                
+                await new Promise((resolve, reject) => {
+                    discImg.onload = resolve;
+                    discImg.onerror = reject;
+                    discImg.src = `http://localhost:3000/disc-bg-new.png?t=${timestamp}`;
+                });
+
+                // Create a test canvas
+                const testCanvas = document.createElement('canvas');
+                testCanvas.width = 300;
+                testCanvas.height = 300;
+                const testCtx = testCanvas.getContext('2d');
+
+                // Draw disc base
+                testCtx.drawImage(discImg, 0, 0, 300, 300);
+
+                // Add a test overlay
+                testCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                testCtx.beginPath();
+                testCtx.arc(150, 150, 50, 0, 2 * Math.PI);
+                testCtx.fill();
+
+                resultDiv.innerHTML = `
+                    <p>✅ Compositor test successful!</p>
+                    <img src="${testCanvas.toDataURL()}" style="width: 300px; height: 300px; border: 1px solid #333;">
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p>❌ Compositor test failed: ${error.message}</p>`;
+            }
+        }
+
+        console.log('🔍 Testing React server disc loading...');
+        console.log('🌐 React server URL:', `http://localhost:3000/disc-bg-new.png?t=${timestamp}`);
+    </script>
+</body>
+</html>

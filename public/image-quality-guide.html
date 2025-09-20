@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Image Quality Refinement Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 25px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+        }
+        .gradient-section {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+        .nature-section {
+            border-left-color: #27ae60;
+            background: #f2fdf5;
+        }
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .prompt-example {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .negative-prompt {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .tips {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .parameter-table th, .parameter-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .parameter-table th {
+            background: #3498db;
+            color: white;
+        }
+        .parameter-table tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+        .test-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #2980b9;
+        }
+        .gradient-button {
+            background: #e74c3c;
+        }
+        .gradient-button:hover {
+            background: #c0392b;
+        }
+        .nature-button {
+            background: #27ae60;
+        }
+        .nature-button:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Image Quality Refinement Guide</h1>
+        <p>This guide will help you refine the quality of your Spotify playlist cover generation, focusing on gradient and nature styles to match your desired aesthetic.</p>
+
+        <h2>🎯 Current Status</h2>
+        <div class="success">
+            <strong>✅ Updated Prompts:</strong> Your prompts have been enhanced with more specific descriptors and better negative prompts.
+            <br><strong>✅ Improved Parameters:</strong> Increased steps to 25 and CFG to 7.5 for better quality.
+            <br><strong>✅ Disc Base Fixed:</strong> The disc base image should now be more visible around the edges.
+        </div>
+
+        <h2>🌈 Gradient Style Refinement</h2>
+        <div class="section gradient-section">
+            <h3>Target Aesthetic (Based on Your Reference Images)</h3>
+            <p>Your reference images show:</p>
+            <ul>
+                <li><strong>Soft, ethereal gradients</strong> with smooth color transitions</li>
+                <li><strong>Pastel tones</strong> and muted colors</li>
+                <li><strong>Subtle texture</strong> and fine grain overlay</li>
+                <li><strong>Dreamy atmosphere</strong> with luminous highlights</li>
+                <li><strong>Curved organic shapes</strong> rather than geometric patterns</li>
+            </ul>
+
+            <h3>Current Gradient Prompt</h3>
+            <div class="prompt-example">
+                <strong>Positive Prompt:</strong><br>
+                <code>soft ethereal gradient background, smooth color transitions, pastel tones, muted colors, gentle blending, subtle texture, fine grain overlay, dreamy atmosphere, luminous highlights, curved organic shapes, {mood}, 300x300px, square, high quality, artistic</code>
+            </div>
+
+            <div class="negative-prompt">
+                <strong>Negative Prompt:</strong><br>
+                <code>harsh lines, sharp edges, vibrant colors, digital art, cartoon, anime, modern, synthetic, geometric shapes, patterns, text, logos</code>
+            </div>
+
+            <h3>Parameter Recommendations</h3>
+            <table class="parameter-table">
+                <tr>
+                    <th>Parameter</th>
+                    <th>Current Value</th>
+                    <th>Recommended Range</th>
+                    <th>Effect</th>
+                </tr>
+                <tr>
+                    <td>Steps</td>
+                    <td>25</td>
+                    <td>20-30</td>
+                    <td>Higher = more detail, longer generation</td>
+                </tr>
+                <tr>
+                    <td>CFG Scale</td>
+                    <td>7.5</td>
+                    <td>6.0-8.5</td>
+                    <td>Higher = more prompt adherence</td>
+                </tr>
+                <tr>
+                    <td>Sampler</td>
+                    <td>euler</td>
+                    <td>euler, dpm++, ddim</td>
+                    <td>euler = fast, dpm++ = quality</td>
+                </tr>
+            </table>
+
+            <h3>Advanced Gradient Prompts</h3>
+            <div class="tips">
+                <strong>For specific color schemes:</strong><br>
+                <code>soft ethereal gradient, {color1} to {color2} transition, pastel tones, muted colors, gentle blending, subtle texture, fine grain overlay, dreamy atmosphere, luminous highlights, curved organic shapes, 300x300px, square, high quality, artistic</code>
+                
+                <br><br><strong>Color combinations that work well:</strong><br>
+                • <code>lavender to peach</code><br>
+                • <code>soft blue to warm beige</code><br>
+                • <code>muted purple to pale yellow</code><br>
+                • <code>sage green to soft pink</code>
+            </div>
+        </div>
+
+        <h2>🌲 Nature Style Refinement</h2>
+        <div class="section nature-section">
+            <h3>Target Aesthetic</h3>
+            <p>Your nature style should produce:</p>
+            <ul>
+                <li><strong>Actual scenic landscapes</strong> (forests, mountains, rivers)</li>
+                <li><strong>Vintage film camera effect</strong> with film grain</li>
+                <li><strong>Sepia tones and faded colors</strong></li>
+                <li><strong>Realistic natural elements</strong> (trees, leaves, water)</li>
+                <li><strong>Golden hour lighting</strong> for warmth</li>
+            </ul>
+
+            <h3>Current Nature Prompt</h3>
+            <div class="prompt-example">
+                <strong>Positive Prompt:</strong><br>
+                <code>vintage film camera effect, scenic landscape, {mood}, dense forest with towering trees, sun dappled leaves, winding river, mountain vista, golden hour lighting, film grain, sepia tones, faded colors, old photograph aesthetic, analog film, 300x300px, square, high quality, realistic</code>
+            </div>
+
+            <div class="negative-prompt">
+                <strong>Negative Prompt:</strong><br>
+                <code>abstract, geometric, digital art, cartoon, anime, modern architecture, people, text, logos, vibrant colors, sharp edges</code>
+            </div>
+
+            <h3>Nature-Specific Improvements</h3>
+            <div class="tips">
+                <strong>To ensure nature elements appear:</strong><br>
+                1. <strong>Be more specific:</strong> Instead of "scenic landscape", use "dense forest with towering trees"<br>
+                2. <strong>Add natural details:</strong> "sun dappled leaves", "winding river", "mountain vista"<br>
+                3. <strong>Emphasize realism:</strong> "high quality, realistic" at the end<br>
+                4. <strong>Use negative prompts:</strong> Explicitly exclude "abstract, geometric"
+            </div>
+
+            <h3>Alternative Nature Prompts</h3>
+            <div class="prompt-example">
+                <strong>Forest Focus:</strong><br>
+                <code>vintage film camera effect, dense forest scene, {mood}, towering pine trees, sun dappled forest floor, moss-covered rocks, filtered sunlight through leaves, film grain, sepia tones, faded colors, old photograph aesthetic, 300x300px, square, realistic</code>
+            </div>
+
+            <div class="prompt-example">
+                <strong>Mountain/Vista Focus:</strong><br>
+                <code>vintage film camera effect, mountain landscape, {mood}, rolling hills, distant mountain peaks, winding path, golden hour lighting, film grain, sepia tones, faded colors, old photograph aesthetic, 300x300px, square, realistic</code>
+            </div>
+        </div>
+
+        <h2>🔧 Technical Improvements</h2>
+        <div class="section">
+            <h3>Model Selection</h3>
+            <div class="warning">
+                <strong>Current Model:</strong> stable-diffusion-v1-5.safetensors<br>
+                <strong>Recommendation:</strong> For better nature scenes, consider downloading Realistic Vision v6 using the download script.
+            </div>
+
+            <h3>Prompt Engineering Tips</h3>
+            <div class="tips">
+                <strong>1. Order Matters:</strong> Put the most important descriptors first<br>
+                <strong>2. Use Weighting:</strong> (word:1.2) to emphasize important terms<br>
+                <strong>3. Combine Styles:</strong> "vintage film camera effect, scenic landscape" works better than just "nature"<br>
+                <strong>4. Quality Terms:</strong> Always end with "high quality, realistic, 300x300px, square"
+            </div>
+
+            <h3>Negative Prompt Power</h3>
+            <div class="negative-prompt">
+                <strong>Common unwanted elements to exclude:</strong><br>
+                • <code>blurry, low quality, distorted, ugly</code> (quality issues)<br>
+                • <code>cartoon, anime, digital art</code> (style conflicts)<br>
+                • <code>vibrant colors, sharp edges</code> (contrasts with soft aesthetic)<br>
+                • <code>modern, synthetic</code> (contrasts with vintage nature)<br>
+                • <code>text, logos, people</code> (unwanted elements)
+            </div>
+        </div>
+
+        <h2>🧪 Testing & Iteration</h2>
+        <div class="section">
+            <h3>How to Test Improvements</h3>
+            <ol>
+                <li><strong>Generate with current prompts</strong> and note what's working/not working</li>
+                <li><strong>Modify one element at a time</strong> (don't change everything at once)</li>
+                <li><strong>Test with different moods</strong> (calm, energetic, mysterious)</li>
+                <li><strong>Compare results</strong> and keep the best versions</li>
+                <li><strong>Iterate gradually</strong> until you achieve the desired quality</li>
+            </ol>
+
+            <h3>Quick Test Commands</h3>
+            <p>You can test prompts directly using curl commands:</p>
+            
+            <div class="code-block">
+# Test Gradient
+curl -X POST http://localhost:5001/api/txt2img \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "soft ethereal gradient background, smooth color transitions, pastel tones, muted colors, gentle blending, subtle texture, fine grain overlay, dreamy atmosphere, luminous highlights, curved organic shapes, energetic, 300x300px, square, high quality, artistic",
+    "negative_prompt": "harsh lines, sharp edges, vibrant colors, digital art, cartoon, anime, modern, synthetic, geometric shapes, patterns, text, logos",
+    "model_name": "stable-diffusion-v1-5.safetensors",
+    "steps": 25,
+    "cfg": 7.5,
+    "width": 300,
+    "height": 300,
+    "batch_size": 1
+  }'
+            </div>
+
+            <div class="code-block">
+# Test Nature
+curl -X POST http://localhost:5001/api/txt2img \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "vintage film camera effect, scenic landscape, calm, dense forest with towering trees, sun dappled leaves, winding river, mountain vista, golden hour lighting, film grain, sepia tones, faded colors, old photograph aesthetic, analog film, 300x300px, square, high quality, realistic",
+    "negative_prompt": "abstract, geometric, digital art, cartoon, anime, modern architecture, people, text, logos, vibrant colors, sharp edges",
+    "model_name": "stable-diffusion-v1-5.safetensors",
+    "steps": 25,
+    "cfg": 7.5,
+    "width": 300,
+    "height": 300,
+    "batch_size": 1
+  }'
+            </div>
+        </div>
+
+        <h2>📈 Next Steps</h2>
+        <div class="section">
+            <h3>Immediate Actions</h3>
+            <ol>
+                <li><strong>Test the current updated prompts</strong> in your app at http://localhost:3000</li>
+                <li><strong>Compare results</strong> with your reference images</li>
+                <li><strong>Identify specific issues</strong> (e.g., "too abstract", "not nature enough")</li>
+                <li><strong>Fine-tune prompts</strong> based on results</li>
+            </ol>
+
+            <h3>Advanced Options</h3>
+            <div class="tips">
+                <strong>For even better results:</strong><br>
+                • <strong>Download better models:</strong> Use <code>./download_free_models.sh</code> to get Realistic Vision v6<br>
+                • <strong>Experiment with samplers:</strong> Try dpm++ for better quality<br>
+                • <strong>Adjust CFG scale:</strong> Lower for more creative freedom, higher for prompt adherence<br>
+                • <strong>Use image-to-image:</strong> Start with a reference image and transform it
+            </div>
+        </div>
+
+        <div class="success">
+            <h3>🎉 Ready to Test!</h3>
+            <p>Your image generation has been significantly improved with:</p>
+            <ul>
+                <li>✅ Enhanced prompts for both gradient and nature styles</li>
+                <li>✅ Better negative prompts to avoid unwanted elements</li>
+                <li>✅ Optimized parameters (25 steps, 7.5 CFG)</li>
+                <li>✅ Fixed disc base layering</li>
+            </ul>
+            <p><strong>Go test it now at:</strong> <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Add any interactive functionality here if needed
+        console.log('Image Quality Guide loaded successfully!');
+    </script>
+</body>
+</html>

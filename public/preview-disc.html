@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disc Base Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .disc-preview {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+        .disc-preview img {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Disc Base Image Preview</h1>
+        
+        <div class="info">
+            <h3>Disc Base Specifications:</h3>
+            <ul>
+                <li><strong>Size:</strong> 300x300 pixels</li>
+                <li><strong>Format:</strong> PNG with transparency</li>
+                <li><strong>Outer Radius:</strong> 120px (80% of canvas)</li>
+                <li><strong>Inner Radius:</strong> 24px (center hole)</li>
+                <li><strong>Style:</strong> Realistic disc with gradient and texture</li>
+            </ul>
+        </div>
+
+        <div class="disc-preview">
+            <h3>Current Disc Base Image:</h3>
+            <img id="discImage" src="/disc-bg-new.png" alt="Disc Base" width="300" height="300" 
+                 onload="showSuccess()" onerror="showError()">
+            <div id="status"></div>
+        </div>
+
+        <div class="info">
+            <h3>Usage in Your App:</h3>
+            <p>This disc base image will be used as the background layer when compositing generated images. The AI-generated content will be overlaid on top of this disc, creating the final playlist cover.</p>
+        </div>
+    </div>
+
+    <script>
+        function showSuccess() {
+            document.getElementById('status').innerHTML = 
+                '<div class="status success">✅ Disc base image loaded successfully!</div>';
+        }
+
+        function showError() {
+            document.getElementById('status').innerHTML = 
+                '<div class="status error">❌ Failed to load disc base image. Check the file path.</div>';
+        }
+
+        // Test image loading
+        window.onload = function() {
+            const img = document.getElementById('discImage');
+            if (img.complete && img.naturalHeight !== 0) {
+                showSuccess();
+            }
+        };
+    </script>
+</body>
+</html>

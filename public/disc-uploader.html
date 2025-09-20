@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disc Image Uploader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        .upload-area.dragover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .preview-area {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .disc-preview {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #333;
+            margin: 20px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .disc-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .overlay-test {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .overlay-test .disc-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .overlay-test .generated {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            margin: -75px 0 0 -75px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            border-radius: 50%;
+            z-index: 2;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Disc Image Uploader</h1>
+        
+        <div class="info">
+            <h3>Upload Requirements:</h3>
+            <ul>
+                <li><strong>Size:</strong> 300x300 pixels (square)</li>
+                <li><strong>Format:</strong> PNG or JPG</li>
+                <li><strong>Content:</strong> A realistic disc/vinyl/CD image</li>
+                <li><strong>Background:</strong> Transparent or solid color</li>
+            </ul>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <p>📁 Click to upload or drag & drop your disc image</p>
+            <p><small>Recommended: 300x300px PNG</small></p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+
+        <div id="previewSection" style="display: none;">
+            <h3>Preview Your Disc Image:</h3>
+            <div class="disc-preview" id="discPreview">
+                <p>No image loaded</p>
+            </div>
+            
+            <h3>Overlay Test (How it will look with generated image):</h3>
+            <div class="overlay-test">
+                <img class="disc-base" id="discBasePreview" src="" alt="Disc Base">
+                <div class="generated"></div>
+            </div>
+            
+            <button onclick="saveDiscImage()">💾 Save as disc-bg-new.png</button>
+            <button onclick="testInApp()">🧪 Test in App</button>
+        </div>
+
+        <div class="info">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Upload your disc image using the area above</li>
+                <li>Preview how it looks in the circular format</li>
+                <li>See the overlay test to check visibility</li>
+                <li>Click "Save as disc-bg-new.png" to replace the current file</li>
+                <li>Test in your React app to see the final result</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const discPreview = document.getElementById('discPreview');
+        const discBasePreview = document.getElementById('discBasePreview');
+
+        let uploadedImage = null;
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImage = e.target.result;
+                
+                // Update preview
+                discPreview.innerHTML = `<img src="${uploadedImage}" alt="Disc Preview">`;
+                discBasePreview.src = uploadedImage;
+                
+                previewSection.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveDiscImage() {
+            if (!uploadedImage) {
+                alert('Please upload an image first');
+                return;
+            }
+
+            // Create download link
+            const link = document.createElement('a');
+            link.download = 'disc-bg-new.png';
+            link.href = uploadedImage;
+            link.click();
+
+            alert('Image downloaded! Now replace the disc-bg-new.png file in your public folder.');
+        }
+
+        function testInApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+    </script>
+</body>
+</html>

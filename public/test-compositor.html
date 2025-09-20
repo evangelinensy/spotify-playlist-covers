@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compositor Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .image-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .image-container img {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Image Compositor Test</h1>
+    <p>Test the disc overlay functionality with a generated image.</p>
+
+    <div class="test-section">
+        <h2>Test Images</h2>
+        <div class="image-container">
+            <div>
+                <h3>Generated Image</h3>
+                <img id="generatedImage" src="" alt="Generated Image" width="200" height="200" style="display: none;">
+                <button onclick="loadGeneratedImage()">Load Generated Image</button>
+            </div>
+            <div>
+                <h3>Disc Base</h3>
+                <img id="discBase" src="/disc-bg-new.png" alt="Disc Base" width="200" height="200">
+            </div>
+            <div>
+                <h3>Composite Result</h3>
+                <img id="compositeResult" src="" alt="Composite Result" width="200" height="200" style="display: none;">
+            </div>
+        </div>
+        
+        <button onclick="testCompositor()">Test Compositor</button>
+        <button onclick="downloadResult()">Download Result</button>
+        
+        <div id="result" class="result" style="display: none;">
+            <h3>Result:</h3>
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        let compositeDataUrl = '';
+
+        async function loadGeneratedImage() {
+            // Use the latest generated image from DreamLayer
+            const imageUrl = 'http://localhost:5001/api/images/DreamLayer_00031_.png';
+            
+            try {
+                const img = document.getElementById('generatedImage');
+                img.src = imageUrl;
+                img.style.display = 'block';
+                
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('resultText').textContent = 'Generated image loaded successfully!';
+            } catch (error) {
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('resultText').textContent = 'Error loading generated image: ' + error.message;
+            }
+        }
+
+        async function testCompositor() {
+            const generatedImg = document.getElementById('generatedImage');
+            const resultImg = document.getElementById('compositeResult');
+            const resultDiv = document.getElementById('result');
+            const resultText = document.getElementById('resultText');
+
+            if (!generatedImg.src) {
+                resultText.textContent = 'Please load a generated image first!';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                resultText.textContent = 'Compositing images...';
+                resultDiv.style.display = 'block';
+
+                // Create canvas for compositing
+                const canvas = document.createElement('canvas');
+                canvas.width = 300;
+                canvas.height = 300;
+                const ctx = canvas.getContext('2d');
+
+                // Load images
+                const generatedImage = await loadImage(generatedImg.src);
+                const discBaseImage = await loadImage('/disc-bg-new.png');
+
+                // Draw disc base as background (should be visible around edges)
+                ctx.drawImage(discBaseImage, 0, 0, 300, 300);
+
+                // Calculate disc area (smaller to show more disc base)
+                const centerX = 150;
+                const centerY = 150;
+                const outerRadius = 105; // 70% of half size (smaller to show more disc base)
+                const innerRadius = 24;  // 16% of half size (center hole)
+
+                // Create circular mask for generated image
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true); // Inner hole
+                ctx.clip();
+
+                // Draw generated image on top of disc base
+                ctx.drawImage(generatedImage, 0, 0, 300, 300);
+                ctx.restore();
+
+                // Add border to make disc more visible
+                ctx.strokeStyle = '#666666';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                // Display result
+                compositeDataUrl = canvas.toDataURL('image/png');
+                resultImg.src = compositeDataUrl;
+                resultImg.style.display = 'block';
+
+                resultText.textContent = 'Compositing successful! The generated image is now layered on top of the disc base.';
+                
+            } catch (error) {
+                resultText.textContent = 'Error compositing images: ' + error.message;
+                console.error('Compositor error:', error);
+            }
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        function downloadResult() {
+            if (compositeDataUrl) {
+                const link = document.createElement('a');
+                link.download = 'test-composite.png';
+                link.href = compositeDataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('Please run the compositor test first!');
+            }
+        }
+    </script>
+</body>
+</html>

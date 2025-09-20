@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Disc Base Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .warning { background: #fff3cd; border-color: #ffeaa7; }
+        img, canvas {
+            max-width: 300px;
+            border: 1px solid #ddd;
+            margin: 10px;
+            display: block;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test Disc Base Fix</h1>
+        
+        <div class="test-section">
+            <h3>1. Direct Disc Base Image</h3>
+            <p>Testing if the disc-bg-new.png loads directly:</p>
+            <img id="discImage" src="/disc-bg-new.png" alt="Disc Base" 
+                 onload="logSuccess('Disc base loaded successfully')" 
+                 onerror="logError('Disc base failed to load')">
+            <p id="discStatus">Loading...</p>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Compositor Test with Real Generated Image</h3>
+            <p>Testing the compositor with a real generated image:</p>
+            <canvas id="compositorCanvas" width="300" height="300" style="border: 1px solid #ddd;"></canvas>
+            <button onclick="testCompositorWithRealImage()">Test with Real Generated Image</button>
+            <p id="compositorStatus">Ready to test</p>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Console Log</h3>
+            <div id="log" class="log">Console output will appear here...\n</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        function logSuccess(message) {
+            log(`✅ ${message}`);
+            document.getElementById('discStatus').textContent = '✅ Success';
+        }
+        
+        function logError(message) {
+            log(`❌ ${message}`);
+            document.getElementById('discStatus').textContent = '❌ Failed';
+        }
+        
+        function clearLog() {
+            logElement.textContent = 'Console output will appear here...\n';
+        }
+
+        async function testCompositorWithRealImage() {
+            log('Testing compositor with real generated image...');
+            
+            try {
+                // Generate a real image using the improved gradient prompt
+                const response = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: 'gradient background, smooth color transition, soft pastel colors, flowing blend, ethereal, dreamy, gentle, seamless, continuous, organic, natural flow, watercolor effect, soft edges, muted tones, atmospheric, calm, 300x300px, square, high quality, artistic',
+                        negative_prompt: 'hard edges, sharp lines, geometric patterns, grid, squares, rectangles, structured, organized, systematic, harsh, bold, vibrant, neon, digital, pixelated, cartoon, anime, text, logos, shapes, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors',
+                        model_name: 'stable-diffusion-v1-5.safetensors',
+                        steps: 25,
+                        cfg: 6.5,
+                        width: 300,
+                        height: 300,
+                        batch_size: 1
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                logSuccess('Generated image successfully');
+                
+                const generatedImageUrl = data.comfy_response.all_images[0].url;
+                log(`Generated image URL: ${generatedImageUrl}`);
+                
+                // Now test the compositor
+                await testCompositor(generatedImageUrl);
+                
+            } catch (error) {
+                logError(`Failed to generate image: ${error.message}`);
+                document.getElementById('compositorStatus').textContent = '❌ Failed to generate image';
+            }
+        }
+
+        async function testCompositor(generatedImageUrl) {
+            log('Testing compositor...');
+            const canvas = document.getElementById('compositorCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                logError('Could not get canvas context');
+                return;
+            }
+            
+            try {
+                // Load disc base
+                const discImg = new Image();
+                discImg.crossOrigin = 'anonymous';
+                
+                discImg.onload = function() {
+                    logSuccess('Disc base loaded for compositor test');
+                    
+                    // Draw disc base as background
+                    ctx.drawImage(discImg, 0, 0, 300, 300);
+                    log('Disc base drawn as background');
+                    
+                    // Load generated image
+                    const genImg = new Image();
+                    genImg.crossOrigin = 'anonymous';
+                    
+                    genImg.onload = function() {
+                        logSuccess('Generated image loaded');
+                        
+                        // Calculate disc area
+                        const centerX = 150;
+                        const centerY = 150;
+                        const outerRadius = 105; // 35% of 300
+                        const innerRadius = 24; // 8% of 300
+                        
+                        // Create circular mask for generated image
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                        ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
+                        ctx.clip();
+                        
+                        // Draw generated image on top
+                        ctx.drawImage(genImg, 0, 0, 300, 300);
+                        ctx.restore();
+                        
+                        // Add border
+                        ctx.strokeStyle = '#666666';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        
+                        log('Compositor test completed - should show disc base with generated image overlay');
+                        document.getElementById('compositorStatus').textContent = '✅ Compositor test completed';
+                    };
+                    
+                    genImg.onerror = function() {
+                        logError('Generated image failed to load');
+                        document.getElementById('compositorStatus').textContent = '❌ Generated image failed to load';
+                    };
+                    
+                    genImg.src = generatedImageUrl;
+                };
+                
+                discImg.onerror = function() {
+                    logError('Disc base failed to load for compositor test');
+                    document.getElementById('compositorStatus').textContent = '❌ Disc base failed to load';
+                };
+                
+                discImg.src = '/disc-bg-new.png';
+                
+            } catch (error) {
+                logError(`Compositor test failed: ${error.message}`);
+                document.getElementById('compositorStatus').textContent = '❌ Compositor test failed';
+            }
+        }
+
+        // Auto-run disc base test
+        window.onload = function() {
+            log('Page loaded, starting tests...');
+        };
+    </script>
+</body>
+</html>

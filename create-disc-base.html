@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Disc Base Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .preview {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .instructions {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Create Disc Base Image</h1>
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click "Generate Disc Base" to create a 300x300px disc image</li>
+                <li>Click "Download Disc Base" to save it as disc-bg-new.png</li>
+                <li>Replace the file in your public folder with this new image</li>
+            </ol>
+        </div>
+
+        <div class="preview">
+            <canvas id="discCanvas" width="300" height="300"></canvas>
+            <br>
+            <button onclick="generateDiscBase()">Generate Disc Base</button>
+            <button onclick="downloadDiscBase()">Download Disc Base</button>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function generateDiscBase() {
+            const canvas = document.getElementById('discCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 300, 300);
+            
+            // Set background to transparent
+            ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+            ctx.fillRect(0, 0, 300, 300);
+            
+            const centerX = 150;
+            const centerY = 150;
+            const outerRadius = 120;  // 80% of half size
+            const innerRadius = 24;   // Center hole
+            
+            // Create gradient for disc surface
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, outerRadius);
+            gradient.addColorStop(0, '#f8f8f8');
+            gradient.addColorStop(0.3, '#e8e8e8');
+            gradient.addColorStop(0.7, '#d8d8d8');
+            gradient.addColorStop(1, '#c8c8c8');
+            
+            // Draw main disc
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Add subtle border
+            ctx.strokeStyle = '#b8b8b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Add center hole
+            ctx.fillStyle = '#2a2a2a';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Add inner hole rim
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Add subtle grooves (concentric circles)
+            ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
+            ctx.lineWidth = 0.5;
+            for (let r = innerRadius + 10; r < outerRadius - 5; r += 15) {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+            
+            // Add some subtle texture dots
+            ctx.fillStyle = 'rgba(180, 180, 180, 0.4)';
+            for (let i = 0; i < 50; i++) {
+                const angle = Math.random() * 2 * Math.PI;
+                const radius = innerRadius + 10 + Math.random() * (outerRadius - innerRadius - 20);
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                ctx.beginPath();
+                ctx.arc(x, y, Math.random() * 2 + 0.5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            // Add subtle highlight
+            const highlightGradient = ctx.createRadialGradient(centerX - 20, centerY - 20, 0, centerX - 20, centerY - 20, 40);
+            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = highlightGradient;
+            ctx.beginPath();
+            ctx.arc(centerX - 20, centerY - 20, 40, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            document.getElementById('status').innerHTML = '<p style="color: green;">✅ Disc base generated successfully!</p>';
+        }
+
+        function downloadDiscBase() {
+            const canvas = document.getElementById('discCanvas');
+            const link = document.createElement('a');
+            link.download = 'disc-bg-new.png';
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            document.getElementById('status').innerHTML = '<p style="color: blue;">📥 Disc base downloaded! Replace the file in your public folder.</p>';
+        }
+
+        // Generate disc base on page load
+        window.onload = function() {
+            generateDiscBase();
+        };
+    </script>
+</body>
+</html>

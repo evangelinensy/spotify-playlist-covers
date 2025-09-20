@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Disc Base Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .warning { background: #fff3cd; border-color: #ffeaa7; }
+        img {
+            max-width: 300px;
+            border: 1px solid #ddd;
+            margin: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Disc Base Image Loading</h1>
+        
+        <div class="test-section">
+            <h3>1. Direct Image Test</h3>
+            <p>Testing if the disc-bg-new.png loads directly:</p>
+            <img id="directImage" src="/disc-bg-new.png" alt="Disc Base" onload="logSuccess('Direct image loaded')" onerror="logError('Direct image failed to load')">
+            <p id="directStatus">Loading...</p>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Canvas Test</h3>
+            <p>Testing canvas loading and drawing:</p>
+            <canvas id="testCanvas" width="300" height="300" style="border: 1px solid #ddd;"></canvas>
+            <button onclick="testCanvasLoading()">Test Canvas Loading</button>
+            <p id="canvasStatus">Ready to test</p>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Compositor Test</h3>
+            <p>Testing the actual compositor function:</p>
+            <canvas id="compositorCanvas" width="300" height="300" style="border: 1px solid #ddd;"></canvas>
+            <button onclick="testCompositor()">Test Compositor</button>
+            <p id="compositorStatus">Ready to test</p>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Console Log</h3>
+            <div id="log" class="log">Console output will appear here...\n</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+        
+        function logSuccess(message) {
+            log(`✅ ${message}`);
+            document.getElementById('directStatus').textContent = '✅ Success';
+        }
+        
+        function logError(message) {
+            log(`❌ ${message}`);
+            document.getElementById('directStatus').textContent = '❌ Failed';
+        }
+        
+        function clearLog() {
+            logElement.textContent = 'Console output will appear here...\n';
+        }
+
+        function testCanvasLoading() {
+            log('Testing canvas loading...');
+            const canvas = document.getElementById('testCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                logError('Could not get canvas context');
+                return;
+            }
+            
+            // Test loading the disc image
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            img.onload = function() {
+                logSuccess('Disc image loaded in canvas test');
+                
+                // Draw the image
+                ctx.drawImage(img, 0, 0, 300, 300);
+                
+                // Draw a test overlay
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.beginPath();
+                ctx.arc(150, 150, 100, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                log('Canvas test completed - disc base should be visible with red overlay');
+                document.getElementById('canvasStatus').textContent = '✅ Canvas test completed';
+            };
+            
+            img.onerror = function() {
+                logError('Disc image failed to load in canvas test');
+                document.getElementById('canvasStatus').textContent = '❌ Canvas test failed';
+            };
+            
+            img.src = '/disc-bg-new.png';
+        }
+
+        function testCompositor() {
+            log('Testing compositor function...');
+            const canvas = document.getElementById('compositorCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+                logError('Could not get canvas context');
+                return;
+            }
+            
+            // Create a test generated image (solid color)
+            const testCanvas = document.createElement('canvas');
+            testCanvas.width = 300;
+            testCanvas.height = 300;
+            const testCtx = testCanvas.getContext('2d');
+            
+            // Create a gradient test image
+            const gradient = testCtx.createLinearGradient(0, 0, 300, 300);
+            gradient.addColorStop(0, '#ff6b6b');
+            gradient.addColorStop(0.5, '#4ecdc4');
+            gradient.addColorStop(1, '#45b7d1');
+            testCtx.fillStyle = gradient;
+            testCtx.fillRect(0, 0, 300, 300);
+            
+            const testImageUrl = testCanvas.toDataURL('image/png');
+            
+            // Load disc base
+            const discImg = new Image();
+            discImg.crossOrigin = 'anonymous';
+            
+            discImg.onload = function() {
+                logSuccess('Disc base loaded for compositor test');
+                
+                // Draw disc base as background
+                ctx.drawImage(discImg, 0, 0, 300, 300);
+                
+                // Calculate disc area
+                const centerX = 150;
+                const centerY = 150;
+                const outerRadius = 105; // 35% of 300
+                const innerRadius = 24; // 8% of 300
+                
+                // Create circular mask for generated image
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
+                ctx.clip();
+                
+                // Draw test image on top
+                const testImg = new Image();
+                testImg.onload = function() {
+                    ctx.drawImage(testImg, 0, 0, 300, 300);
+                    ctx.restore();
+                    
+                    // Add border
+                    ctx.strokeStyle = '#666666';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    
+                    log('Compositor test completed - should show disc base with gradient overlay');
+                    document.getElementById('compositorStatus').textContent = '✅ Compositor test completed';
+                };
+                testImg.src = testImageUrl;
+            };
+            
+            discImg.onerror = function() {
+                logError('Disc base failed to load for compositor test');
+                document.getElementById('compositorStatus').textContent = '❌ Compositor test failed';
+            };
+            
+            discImg.src = '/disc-bg-new.png';
+        }
+
+        // Auto-run direct image test
+        window.onload = function() {
+            log('Page loaded, starting tests...');
+        };
+    </script>
+</body>
+</html>

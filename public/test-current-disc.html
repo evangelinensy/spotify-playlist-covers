@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Current Disc Base</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .disc-test {
+            margin: 20px 0;
+        }
+        .disc-test img {
+            border: 2px solid #333;
+            margin: 10px;
+        }
+        .overlay-test {
+            position: relative;
+            display: inline-block;
+            margin: 20px;
+        }
+        .overlay-test .disc-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .overlay-test .generated {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            margin: 75px;
+            clip-path: circle(75px at 75px 75px);
+        }
+        .info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Current Disc Base Image</h1>
+        
+        <div class="info">
+            <h3>Testing the current disc-bg-new.png file</h3>
+            <p>This page will show:</p>
+            <ul>
+                <li>The raw disc-bg-new.png image</li>
+                <li>A simulated overlay test with a colored circle</li>
+                <li>Console logs for debugging</li>
+            </ul>
+        </div>
+
+        <div class="disc-test">
+            <h3>Current disc-bg-new.png:</h3>
+            <img id="discBase" src="disc-bg-new.png" alt="Disc Base" width="300" height="300">
+            <p>Size: 300x300px</p>
+        </div>
+
+        <div class="disc-test">
+            <h3>Overlay Test (simulated generated image):</h3>
+            <div class="overlay-test" style="width: 300px; height: 300px;">
+                <img class="disc-base" src="disc-bg-new.png" width="300" height="300">
+                <div class="generated" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);"></div>
+            </div>
+            <p>Blue circle should be visible on top of disc base</p>
+        </div>
+
+        <div class="info">
+            <h3>Debug Info:</h3>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const discImg = document.getElementById('discBase');
+            const debugDiv = document.getElementById('debugInfo');
+            
+            discImg.onload = function() {
+                debugDiv.innerHTML = `
+                    <p>✅ Disc base loaded successfully</p>
+                    <p>Dimensions: ${discImg.naturalWidth} x ${discImg.naturalHeight}</p>
+                    <p>Source: ${discImg.src}</p>
+                `;
+                console.log('Disc base loaded:', discImg);
+            };
+            
+            discImg.onerror = function() {
+                debugDiv.innerHTML = `
+                    <p>❌ Failed to load disc base image</p>
+                    <p>Check if disc-bg-new.png exists in public folder</p>
+                `;
+                console.error('Failed to load disc base image');
+            };
+        };
+    </script>
+</body>
+</html>

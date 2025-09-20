@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Better Disc Base</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            display: block;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .preview {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Create Better Disc Base Image</h1>
+        
+        <div class="info">
+            <h3>This tool creates a realistic disc base image for Spotify playlist covers</h3>
+            <p>Features:</p>
+            <ul>
+                <li>Realistic CD-like appearance with gradients</li>
+                <li>Proper center hole and transparent background</li>
+                <li>Subtle texture and reflections</li>
+                <li>Perfect 300x300px size for playlist covers</li>
+            </ul>
+        </div>
+
+        <div class="preview">
+            <h3>Generated Disc Preview:</h3>
+            <canvas id="discCanvas" width="300" height="300"></canvas>
+            <br>
+            <button onclick="generateDisc()">Generate New Disc</button>
+            <button onclick="downloadDisc()">Download Disc Image</button>
+        </div>
+
+        <div class="info">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click "Generate New Disc" to create a new disc image</li>
+                <li>Click "Download Disc Image" to save the PNG file</li>
+                <li>Replace the existing <code>public/disc-bg-new.png</code> with the downloaded file</li>
+                <li>Restart your React app to see the changes</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function generateDisc() {
+            const canvas = document.getElementById('discCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 300, 300);
+            
+            // Set canvas size
+            canvas.width = 300;
+            canvas.height = 300;
+            
+            const centerX = 150;
+            const centerY = 150;
+            const outerRadius = 140;
+            const innerRadius = 20;
+            const centerHoleRadius = 8;
+            
+            // Create radial gradient for disc surface
+            const discGradient = ctx.createRadialGradient(
+                centerX - 20, centerY - 20, 0,
+                centerX, centerY, outerRadius
+            );
+            
+            // Add gradient stops for realistic CD appearance
+            discGradient.addColorStop(0, '#f8f9fa');      // Bright center
+            discGradient.addColorStop(0.3, '#e9ecef');    // Light gray
+            discGradient.addColorStop(0.6, '#dee2e6');    // Medium gray
+            discGradient.addColorStop(0.8, '#ced4da');    // Darker gray
+            discGradient.addColorStop(1, '#adb5bd');      // Dark edge
+            
+            // Draw outer disc
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
+            ctx.fillStyle = discGradient;
+            ctx.fill();
+            
+            // Add subtle texture with small circles
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            for (let i = 0; i < 50; i++) {
+                const angle = (Math.PI * 2 * i) / 50;
+                const radius = innerRadius + (outerRadius - innerRadius) * Math.random();
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const size = Math.random() * 3 + 1;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Add subtle highlight
+            const highlightGradient = ctx.createRadialGradient(
+                centerX - 30, centerY - 30, 0,
+                centerX - 30, centerY - 30, 60
+            );
+            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.beginPath();
+            ctx.arc(centerX - 30, centerY - 30, 60, 0, Math.PI * 2);
+            ctx.fillStyle = highlightGradient;
+            ctx.fill();
+            
+            // Draw inner ring (where the image will go)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fill();
+            
+            // Draw center hole
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, centerHoleRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#6c757d';
+            ctx.fill();
+            
+            // Add subtle shadow around the disc
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            
+            // Redraw outer edge with shadow
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            console.log('Disc generated successfully!');
+        }
+        
+        function downloadDisc() {
+            const canvas = document.getElementById('discCanvas');
+            const link = document.createElement('a');
+            link.download = 'disc-bg-new.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            console.log('Disc image downloaded!');
+        }
+        
+        // Generate initial disc
+        window.onload = function() {
+            generateDisc();
+        };
+    </script>
+</body>
+</html>
