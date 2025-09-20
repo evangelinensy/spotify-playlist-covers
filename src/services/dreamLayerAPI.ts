@@ -177,4 +177,5 @@ class DreamLayerAPI {
   }
 }
 
-export default new DreamLayerAPI();
+const dreamLayerAPI = new DreamLayerAPI();
+export default dreamLayerAPI;

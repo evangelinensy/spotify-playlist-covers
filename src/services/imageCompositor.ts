@@ -194,4 +194,5 @@ class ImageCompositor {
   }
 }
 
-export default new ImageCompositor();
+const imageCompositor = new ImageCompositor();
+export default imageCompositor;

@@ -51,7 +51,7 @@ class SpotifyAnalyzer {
   parseSpotifyURL(url: string): string | null {
     const patterns = [
       /spotify\.com\/playlist\/([a-zA-Z0-9]+)/,
-      /spotify\.com\/user\/[^\/]+\/playlist\/([a-zA-Z0-9]+)/,
+      /spotify\.com\/user\/[^/]+\/playlist\/([a-zA-Z0-9]+)/,
       /open\.spotify\.com\/playlist\/([a-zA-Z0-9]+)/
     ];
 
@@ -255,4 +255,5 @@ class SpotifyAnalyzer {
   }
 }
 
-export default new SpotifyAnalyzer();
+const spotifyAnalyzer = new SpotifyAnalyzer();
+export default spotifyAnalyzer;
