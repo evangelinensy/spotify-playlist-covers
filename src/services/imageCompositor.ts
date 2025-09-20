@@ -9,6 +9,7 @@ export interface CompositorOptions {
 
 class ImageCompositor {
   private defaultDiscBase: string = '/disc-bg-new.png'; // Disc base image in public folder
+  private plasticCoverImage: string = '/plastic-disc-cover.png'; // Plastic cover overlay
   private defaultOutputSize: number = 300;
 
   /**
@@ -115,6 +116,27 @@ class ImageCompositor {
 
       ctx.restore();
 
+      // Randomly add plastic cover overlay (40% chance for variety)
+      const shouldAddPlasticCover = Math.random() < 0.4;
+      console.log(`🎲 Random plastic cover decision: ${shouldAddPlasticCover ? 'YES' : 'NO'} (40% chance)`);
+      
+      if (shouldAddPlasticCover) {
+        try {
+          console.log('🔄 Adding plastic cover overlay...');
+          const plasticCover = await this.loadImage(this.plasticCoverImage);
+          console.log('✅ Plastic cover loaded, drawing overlay');
+          ctx.drawImage(plasticCover, 0, 0, outputSize, outputSize);
+          console.log('✨ Applied plastic cover overlay for realistic disc effect');
+        } catch (error) {
+          console.warn('❌ Plastic cover image not found, creating fallback effect:', error);
+          // Create a simple plastic effect if image is not available
+          this.addSimplePlasticEffect(ctx, outputSize);
+          console.log('✨ Applied fallback plastic effect');
+        }
+      } else {
+        console.log('📀 Using standard disc without plastic overlay');
+      }
+
       // Add a subtle border to make the disc more visible
       ctx.strokeStyle = '#666666';
       ctx.lineWidth = 2;
@@ -171,6 +193,49 @@ class ImageCompositor {
     const img = new Image();
     img.src = canvas.toDataURL('image/png');
     return img;
+  }
+
+  /**
+   * Add a simple plastic effect overlay
+   */
+  private addSimplePlasticEffect(ctx: CanvasRenderingContext2D, size: number): void {
+    // Create plastic reflection effect
+    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); // Center highlight
+    gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.05)'); // Mid highlight
+    gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.1)'); // Mid shadow
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)'); // Edge shadow
+    
+    // Draw circular plastic effect
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Add subtle texture lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    
+    // Draw concentric circles for texture
+    for (let i = 1; i <= 5; i++) {
+      const radius = (size / 2 / 5) * i;
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+    
+    // Add center hole highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size * 0.08, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    // Add rim highlight
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+    ctx.stroke();
   }
 
   /**

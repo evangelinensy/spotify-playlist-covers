@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Plastic Disc Cover</title>
+</head>
+<body>
+    <h1>Create Plastic Disc Cover Overlay</h1>
+    <canvas id="canvas" width="300" height="300" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="createPlasticCover()">Generate Plastic Cover</button>
+    <button onclick="downloadImage()">Download Image</button>
+
+    <script>
+        function createPlasticCover() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 300, 300);
+            
+            // Create transparent background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+            ctx.fillRect(0, 0, 300, 300);
+            
+            // Create plastic reflection effect
+            const gradient = ctx.createRadialGradient(150, 150, 0, 150, 150, 150);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); // Center highlight
+            gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.05)'); // Mid highlight
+            gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.1)'); // Mid shadow
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)'); // Edge shadow
+            
+            // Draw circular plastic effect
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(150, 150, 150, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Add subtle texture lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            // Draw concentric circles for texture
+            for (let i = 1; i <= 5; i++) {
+                const radius = (150 / 5) * i;
+                ctx.beginPath();
+                ctx.arc(150, 150, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+            
+            // Add center hole highlight
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.arc(150, 150, 24, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Add rim highlight
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(150, 150, 150, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+        
+        function downloadImage() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = 'plastic-disc-cover.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Create the plastic cover on page load
+        createPlasticCover();
+    </script>
+</body>
+</html>

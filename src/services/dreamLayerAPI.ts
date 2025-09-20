@@ -42,11 +42,19 @@ class DreamLayerAPI {
   private modelsURL: string;
   private imagesURL: string;
 
-  constructor(baseURL: string = 'http://localhost') {
-    this.baseURL = baseURL;
-    this.txt2imgURL = `${baseURL}:5001/api/txt2img`;
-    this.modelsURL = `${baseURL}:5002/api/models`;
-    this.imagesURL = `${baseURL}:5001/api/images`;
+  constructor(baseURL?: string) {
+    // Use environment variable or fallback to localhost for development
+    this.baseURL = baseURL || process.env.REACT_APP_API_BASE_URL || 'http://localhost';
+    this.txt2imgURL = `${this.baseURL}:5001/api/txt2img`;
+    this.modelsURL = `${this.baseURL}:5002/api/models`;
+    this.imagesURL = `${this.baseURL}:5001/api/images`;
+  }
+
+  /**
+   * Check if we're in demo mode (production without API)
+   */
+  private isDemoMode(): boolean {
+    return !this.baseURL.includes('localhost') && !this.baseURL.includes('127.0.0.1');
   }
 
   /**
