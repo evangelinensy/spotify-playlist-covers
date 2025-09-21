@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Disc Image Generation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .test-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .result-image {
+            max-width: 300px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+        .disc-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+        }
+        .disc-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 3px solid #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Disc Image Generation</h1>
+        <p>This page tests the complete flow from DreamLayer API to disc image generation.</p>
+
+        <!-- Test 1: Direct API Call -->
+        <div class="test-section">
+            <h2>Test 1: Direct DreamLayer API Call</h2>
+            <p>Test calling the DreamLayer API directly to generate an image.</p>
+            <button class="test-button" onclick="testDirectAPICall()">Generate Image via API</button>
+            <div id="api-status"></div>
+            <div id="api-log" class="log"></div>
+            <img id="api-result" class="result-image" style="display: none;" />
+        </div>
+
+        <!-- Test 2: Image Compositing -->
+        <div class="test-section">
+            <h2>Test 2: Image Compositing</h2>
+            <p>Test the image compositing process to create a disc cover.</p>
+            <button class="test-button" onclick="testImageCompositing()">Create Disc Cover</button>
+            <div id="compositing-status"></div>
+            <div id="compositing-log" class="log"></div>
+            <img id="compositing-result" class="result-image" style="display: none;" />
+        </div>
+
+        <!-- Test 3: Complete Flow -->
+        <div class="test-section">
+            <h2>Test 3: Complete Flow</h2>
+            <p>Test the complete flow: API → Compositing → Final Disc</p>
+            <button class="test-button" onclick="testCompleteFlow()">Run Complete Flow</button>
+            <div id="complete-status"></div>
+            <div id="complete-log" class="log"></div>
+            <div class="disc-container">
+                <img id="complete-result" class="disc-image" style="display: none;" />
+            </div>
+        </div>
+
+        <!-- Test 4: App Integration -->
+        <div class="test-section">
+            <h2>Test 4: App Integration</div>
+            <p>Test the same flow that the React app uses.</p>
+            <button class="test-button" onclick="testAppIntegration()">Test App Flow</button>
+            <div id="app-status"></div>
+            <div id="app-log" class="log"></div>
+            <div class="disc-container">
+                <img id="app-result" class="disc-image" style="display: none;" />
+            </div>
+        </div>
+
+        <!-- Test 5: Verify in App -->
+        <div class="test-section">
+            <h2>Test 5: Verify in App</h2>
+            <p>Open the actual React app to verify the integration.</p>
+            <button class="test-button" onclick="openApp()">Open React App</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5001';
+        const TXT2IMG_URL = `${API_BASE_URL}/api/txt2img`;
+        const IMAGES_URL = `${API_BASE_URL}/api/images`;
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testDirectAPICall() {
+            const statusId = 'api-status';
+            const logId = 'api-log';
+            const resultId = 'api-result';
+
+            setStatus(statusId, 'Testing direct API call...', 'info');
+            document.getElementById(logId).textContent = '';
+            document.getElementById(resultId).style.display = 'none';
+
+            try {
+                log(logId, '🚀 Calling DreamLayer API...');
+                
+                const payload = {
+                    prompt: "gradient background, smooth color transition, soft blues, gentle purples, muted greens, flowing blend, ethereal, dreamy, gentle, seamless, continuous, organic, natural flow, watercolor effect, soft edges, muted tones, atmospheric, calm mood, 300x300px, square, high quality, artistic",
+                    negative_prompt: "hard edges, sharp lines, geometric patterns, grid, squares, rectangles, structured, organized, systematic, harsh, bold, vibrant, neon, digital, pixelated, cartoon, anime, text, logos, shapes, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                log(logId, `📦 Payload: ${JSON.stringify(payload, null, 2)}`);
+
+                const response = await fetch(TXT2IMG_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                log(logId, `📡 Response status: ${response.status}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(logId, `📄 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error(`API Error: ${data.message || 'No images generated'}`);
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                const imageUrl = `${IMAGES_URL}/${generatedImageFilename}`;
+                
+                log(logId, `🖼️ Generated image: ${generatedImageFilename}`);
+                log(logId, `🔗 Image URL: ${imageUrl}`);
+
+                // Test if image is accessible
+                const img = new Image();
+                img.onload = () => {
+                    log(logId, `✅ Image loaded successfully: ${img.width}x${img.height}`);
+                    document.getElementById(resultId).src = imageUrl;
+                    document.getElementById(resultId).style.display = 'block';
+                    setStatus(statusId, '✅ Direct API call successful!', 'success');
+                };
+                img.onerror = () => {
+                    log(logId, `❌ Failed to load image from: ${imageUrl}`);
+                    setStatus(statusId, '❌ Image generated but not accessible', 'error');
+                };
+                img.src = imageUrl;
+
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ API call failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testImageCompositing() {
+            const statusId = 'compositing-status';
+            const logId = 'compositing-log';
+            const resultId = 'compositing-result';
+
+            setStatus(statusId, 'Testing image compositing...', 'info');
+            document.getElementById(logId).textContent = '';
+            document.getElementById(resultId).style.display = 'none';
+
+            try {
+                log(logId, '🎨 Starting image compositing test...');
+
+                // First generate an image
+                log(logId, 'Step 1: Generating image via API...');
+                const payload = {
+                    prompt: "abstract geometric shapes, calm mood, soft blues, gentle purples, muted greens, modern art, 300x300px, square",
+                    negative_prompt: "realistic, photographic, nature, landscapes, people, objects, text, logos",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                const response = await fetch(TXT2IMG_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error('Failed to generate image for compositing test');
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                const generatedImageUrl = `${IMAGES_URL}/${generatedImageFilename}`;
+                
+                log(logId, `✅ Generated image: ${generatedImageFilename}`);
+
+                // Now test compositing
+                log(logId, 'Step 2: Loading disc base image...');
+                const discBaseImage = await loadImage('/disc-bg-new.png');
+                log(logId, `✅ Disc base loaded: ${discBaseImage.width}x${discBaseImage.height}`);
+
+                log(logId, 'Step 3: Loading generated image...');
+                const generatedImage = await loadImage(generatedImageUrl);
+                log(logId, `✅ Generated image loaded: ${generatedImage.width}x${generatedImage.height}`);
+
+                log(logId, 'Step 4: Creating canvas for compositing...');
+                const canvas = document.createElement('canvas');
+                canvas.width = 300;
+                canvas.height = 300;
+                const ctx = canvas.getContext('2d');
+
+                log(logId, 'Step 5: Drawing disc base...');
+                ctx.drawImage(discBaseImage, 0, 0, 300, 300);
+
+                log(logId, 'Step 6: Creating circular mask...');
+                const centerX = 150 - 6; // Move 6px left
+                const centerY = 150;
+                const outerRadius = 300 * 0.42; // 84% of half size
+                const innerRadius = 300 * 0.08; // 16% of half size (center hole)
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true); // Inner hole
+                ctx.clip();
+
+                log(logId, 'Step 7: Drawing generated image on top...');
+                ctx.drawImage(generatedImage, 0, 0, 300, 300);
+                ctx.restore();
+
+                log(logId, 'Step 8: Adding border...');
+                ctx.strokeStyle = '#666666';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                const finalImageUrl = canvas.toDataURL('image/png');
+                log(logId, `✅ Compositing complete! Final image: ${finalImageUrl.substring(0, 50)}...`);
+
+                document.getElementById(resultId).src = finalImageUrl;
+                document.getElementById(resultId).style.display = 'block';
+                setStatus(statusId, '✅ Image compositing successful!', 'success');
+
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ Compositing failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCompleteFlow() {
+            const statusId = 'complete-status';
+            const logId = 'complete-log';
+            const resultId = 'complete-result';
+
+            setStatus(statusId, 'Testing complete flow...', 'info');
+            document.getElementById(logId).textContent = '';
+            document.getElementById(resultId).style.display = 'none';
+
+            try {
+                log(logId, '🎯 Starting complete flow test...');
+
+                // Step 1: Generate image
+                log(logId, 'Step 1: Generating image with DreamLayer API...');
+                const payload = {
+                    prompt: "vintage film camera effect, scenic landscape, calm mood, dense forest with towering trees, sun dappled leaves, winding river, mountain vista, golden hour lighting, film grain, sepia tones, faded colors, old photograph aesthetic, analog film, 300x300px, square, high quality, realistic",
+                    negative_prompt: "abstract, geometric, digital art, cartoon, anime, modern architecture, people, text, logos, vibrant colors, sharp edges",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                const response = await fetch(TXT2IMG_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error('Failed to generate image');
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                const generatedImageUrl = `${IMAGES_URL}/${generatedImageFilename}`;
+                
+                log(logId, `✅ Generated: ${generatedImageFilename}`);
+
+                // Step 2: Composite disc
+                log(logId, 'Step 2: Compositing disc cover...');
+                const finalImageUrl = await compositeDiscCover(generatedImageUrl);
+                
+                log(logId, `✅ Complete flow successful!`);
+                document.getElementById(resultId).src = finalImageUrl;
+                document.getElementById(resultId).style.display = 'block';
+                setStatus(statusId, '✅ Complete flow successful!', 'success');
+
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ Complete flow failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAppIntegration() {
+            const statusId = 'app-status';
+            const logId = 'app-log';
+            const resultId = 'app-result';
+
+            setStatus(statusId, 'Testing app integration...', 'info');
+            document.getElementById(logId).textContent = '';
+            document.getElementById(resultId).style.display = 'none';
+
+            try {
+                log(logId, '🎮 Testing app integration flow...');
+
+                // Simulate the app's flow
+                const vibe = 'Main Character';
+                const imageTheme = 'gradients'; // Main Character maps to gradients
+                const mood = 'calm';
+                const playlistName = 'Test Playlist';
+
+                log(logId, `Selected vibe: ${vibe} → Image theme: ${imageTheme}`);
+                log(logId, `Mood: ${mood}, Playlist: ${playlistName}`);
+
+                // Generate image using the same logic as the app
+                const prompts = {
+                    gradients: `gradient background, smooth color transition, soft blues, gentle purples, muted greens, flowing blend, ethereal, dreamy, gentle, seamless, continuous, organic, natural flow, watercolor effect, soft edges, muted tones, atmospheric, ${mood} mood, 300x300px, square, high quality, artistic`,
+                    abstract: `abstract geometric shapes, ${mood} mood, soft blues, gentle purples, muted greens, modern art, 300x300px, square`,
+                    nature: `vintage film camera effect, scenic landscape, ${mood} mood, dense forest with towering trees, sun dappled leaves, winding river, mountain vista, golden hour lighting, film grain, sepia tones, faded colors, old photograph aesthetic, analog film, 300x300px, square, high quality, realistic`
+                };
+
+                const negativePrompts = {
+                    gradients: 'hard edges, sharp lines, geometric patterns, grid, squares, rectangles, structured, organized, systematic, harsh, bold, vibrant, neon, digital, pixelated, cartoon, anime, text, logos, shapes, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors',
+                    abstract: 'realistic, photographic, nature, landscapes, people, objects, text, logos',
+                    nature: 'abstract, geometric, digital art, cartoon, anime, modern architecture, people, text, logos, vibrant colors, sharp edges'
+                };
+
+                const prompt = prompts[imageTheme];
+                const negativePrompt = negativePrompts[imageTheme];
+                
+                log(logId, `Using prompt: ${prompt.substring(0, 100)}...`);
+                log(logId, `Using negative prompt: ${negativePrompt.substring(0, 100)}...`);
+
+                const payload = {
+                    prompt: prompt,
+                    negative_prompt: negativePrompt,
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                const response = await fetch(TXT2IMG_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error('Failed to generate image');
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                const generatedImageUrl = `${IMAGES_URL}/${generatedImageFilename}`;
+                
+                log(logId, `✅ Generated image: ${generatedImageFilename}`);
+
+                // Composite the disc
+                const finalImageUrl = await compositeDiscCover(generatedImageUrl);
+                
+                log(logId, `✅ App integration test successful!`);
+                document.getElementById(resultId).src = finalImageUrl;
+                document.getElementById(resultId).style.display = 'block';
+                setStatus(statusId, '✅ App integration successful!', 'success');
+
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ App integration failed: ${error.message}`, 'error');
+            }
+        }
+
+        function openApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        // Helper functions
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+                img.src = src;
+            });
+        }
+
+        async function compositeDiscCover(generatedImageUrl) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+
+            // Load disc base
+            const discBaseImage = await loadImage('/disc-bg-new.png');
+            ctx.drawImage(discBaseImage, 0, 0, 300, 300);
+
+            // Load generated image
+            const generatedImage = await loadImage(generatedImageUrl);
+
+            // Create circular mask
+            const centerX = 150 - 6; // Move 6px left
+            const centerY = 150;
+            const outerRadius = 300 * 0.42; // 84% of half size
+            const innerRadius = 300 * 0.08; // 16% of half size
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
+            ctx.clip();
+
+            // Draw generated image
+            ctx.drawImage(generatedImage, 0, 0, 300, 300);
+            ctx.restore();
+
+            // Add border
+            ctx.strokeStyle = '#666666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            return canvas.toDataURL('image/png');
+        }
+    </script>
+</body>
+</html>

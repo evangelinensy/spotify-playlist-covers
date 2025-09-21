@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>🐛 Debug API Configuration</h1>
+        <p>This page tests the exact same API configuration as the React app.</p>
+
+        <div class="debug-section">
+            <h2>Test 1: API Configuration</h2>
+            <p>Check what URLs the React app is using.</p>
+            <button class="test-button" onclick="testAPIConfig()">Test API Config</button>
+            <div id="config-status"></div>
+            <div id="config-log" class="log"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>Test 2: Direct API Call</h2>
+            <p>Test calling the API with the same configuration as React app.</p>
+            <button class="test-button" onclick="testDirectAPICall()">Test Direct API Call</button>
+            <div id="api-status"></div>
+            <div id="api-log" class="log"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>Test 3: Image Access</h2>
+            <p>Test if generated images are accessible.</p>
+            <button class="test-button" onclick="testImageAccess()">Test Image Access</button>
+            <div id="image-status"></div>
+            <div id="image-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate the same configuration as the React app
+        const baseURL = 'http://localhost'; // Same as React app default
+        const txt2imgURL = `${baseURL}:5001/api/txt2img`;
+        const imagesURL = `${baseURL}:5001/api/images`;
+
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testAPIConfig() {
+            const statusId = 'config-status';
+            const logId = 'config-log';
+
+            setStatus(statusId, 'Testing API configuration...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🔧 API Configuration:');
+                log(logId, `Base URL: ${baseURL}`);
+                log(logId, `Txt2Img URL: ${txt2imgURL}`);
+                log(logId, `Images URL: ${imagesURL}`);
+
+                // Test if the endpoints are reachable
+                log(logId, '🔍 Testing endpoint reachability...');
+                
+                const response = await fetch(txt2imgURL, { method: 'HEAD' });
+                log(logId, `Txt2Img endpoint status: ${response.status} ${response.statusText}`);
+                
+                if (response.status === 405) {
+                    log(logId, '✅ Txt2Img endpoint is reachable (405 = Method Not Allowed for HEAD is expected)');
+                }
+
+                setStatus(statusId, '✅ API configuration looks correct!', 'success');
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ API configuration error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDirectAPICall() {
+            const statusId = 'api-status';
+            const logId = 'api-log';
+
+            setStatus(statusId, 'Testing direct API call...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🚀 Making direct API call...');
+                
+                const payload = {
+                    prompt: "vibrant energetic gradient disc, bold colors, dynamic transitions, electric blues, bright purples, neon accents, high contrast, energetic mood, modern digital art, circular vinyl disc, subtle noise texture, playful UI design, 300x300px, square, high quality, contemporary",
+                    negative_prompt: "hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                log(logId, `📦 Payload: ${JSON.stringify(payload, null, 2)}`);
+                log(logId, `🌐 Calling: ${txt2imgURL}`);
+
+                const response = await fetch(txt2imgURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                log(logId, `📡 Response status: ${response.status} ${response.statusText}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(logId, `📄 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error(`API Error: ${data.message || 'No images generated'}`);
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                const imageUrl = `${imagesURL}/${generatedImageFilename}`;
+                
+                log(logId, `🖼️ Generated image: ${generatedImageFilename}`);
+                log(logId, `🔗 Image URL: ${imageUrl}`);
+
+                // Store for next test
+                window.lastGeneratedImage = imageUrl;
+                window.lastGeneratedFilename = generatedImageFilename;
+
+                setStatus(statusId, '✅ Direct API call successful!', 'success');
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ Direct API call failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testImageAccess() {
+            const statusId = 'image-status';
+            const logId = 'image-log';
+
+            setStatus(statusId, 'Testing image access...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                if (!window.lastGeneratedImage) {
+                    throw new Error('No generated image URL available. Run Test 2 first.');
+                }
+
+                log(logId, `🖼️ Testing image access: ${window.lastGeneratedImage}`);
+
+                const response = await fetch(window.lastGeneratedImage, { method: 'HEAD' });
+                log(logId, `📡 Image response status: ${response.status} ${response.statusText}`);
+
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    const contentLength = response.headers.get('content-length');
+                    log(logId, `✅ Image accessible! Content-Type: ${contentType}, Size: ${contentLength} bytes`);
+                    
+                    // Test loading the image
+                    const img = new Image();
+                    img.onload = () => {
+                        log(logId, `✅ Image loaded successfully: ${img.width}x${img.height} pixels`);
+                        setStatus(statusId, '✅ Image access successful!', 'success');
+                    };
+                    img.onerror = () => {
+                        log(logId, `❌ Failed to load image in browser`);
+                        setStatus(statusId, '❌ Image load failed', 'error');
+                    };
+                    img.src = window.lastGeneratedImage;
+                } else {
+                    throw new Error(`Image not accessible: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ Image access failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

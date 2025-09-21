@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Fetch Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔬 Simple Fetch Test</h1>
+        <p>This tests the most basic fetch request to see if the issue is with the request itself.</p>
+
+        <button class="test-button" onclick="testSimpleFetch()">Test Simple Fetch</button>
+        <div id="status"></div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const element = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(message, type = 'info') {
+            const element = document.getElementById('status');
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testSimpleFetch() {
+            setStatus('Testing simple fetch...', 'info');
+            document.getElementById('log').textContent = '';
+
+            try {
+                log('🚀 Making simple HEAD request to test connectivity');
+                
+                const response = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'HEAD'
+                });
+                
+                log(`✅ Response status: ${response.status} ${response.statusText}`);
+                log(`📋 Headers: ${JSON.stringify([...response.headers.entries()], null, 2)}`);
+                
+                setStatus('✅ Simple fetch successful!', 'success');
+                
+            } catch (error) {
+                log(`❌ Simple fetch failed: ${error.message}`);
+                log(`❌ Error type: ${error.name}`);
+                log(`❌ Error stack: ${error.stack}`);
+                
+                setStatus(`❌ Simple fetch failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

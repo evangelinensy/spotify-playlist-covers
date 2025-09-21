@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test for DreamLayer Images</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+        .image-preview {
+            max-width: 300px;
+            border: 2px solid #333;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 CORS Test for DreamLayer Images</h1>
+        <p>This tests if we can load images from the DreamLayer API in the browser.</p>
+
+        <div class="test-section">
+            <h2>Test 1: Generate Fresh Image</h2>
+            <p>Generate a new image from DreamLayer API.</p>
+            <button class="test-button" onclick="generateNewImage()">Generate New Image</button>
+            <div id="generate-status"></div>
+            <div id="generate-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: Load Image WITHOUT crossOrigin</h2>
+            <p>Test loading the generated image without CORS settings.</p>
+            <button class="test-button" onclick="testImageLoad(false)">Load WITHOUT crossOrigin</button>
+            <div id="load1-status"></div>
+            <div id="load1-log" class="log"></div>
+            <div id="load1-preview"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: Load Image WITH crossOrigin='anonymous'</h2>
+            <p>Test loading the generated image with CORS settings (like our app).</p>
+            <button class="test-button" onclick="testImageLoad(true)">Load WITH crossOrigin</button>
+            <div id="load2-status"></div>
+            <div id="load2-log" class="log"></div>
+            <div id="load2-preview"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 4: Test Canvas Drawing</h2>
+            <p>Test if we can draw the image on a canvas (required for compositing).</p>
+            <button class="test-button" onclick="testCanvasDrawing()">Test Canvas Drawing</button>
+            <div id="canvas-status"></div>
+            <div id="canvas-log" class="log"></div>
+            <div id="canvas-preview"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentImageUrl = null;
+
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function generateNewImage() {
+            const statusId = 'generate-status';
+            const logId = 'generate-log';
+
+            setStatus(statusId, 'Generating new image...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🚀 Calling DreamLayer API...');
+                
+                const payload = {
+                    prompt: "vibrant energetic gradient disc, bold colors, dynamic transitions, electric blues, bright purples, neon accents, high contrast, energetic mood, modern digital art, circular vinyl disc, subtle noise texture, playful UI design, 300x300px, square, high quality, contemporary",
+                    negative_prompt: "hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                const response = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(logId, `📄 API Response: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error(`API Error: ${data.message || 'No images generated'}`);
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                currentImageUrl = `http://localhost:5001/api/images/${generatedImageFilename}`;
+                
+                log(logId, `🖼️ Generated image: ${generatedImageFilename}`);
+                log(logId, `🔗 Image URL: ${currentImageUrl}`);
+
+                setStatus(statusId, '✅ Image generated successfully!', 'success');
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ Generation failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testImageLoad(useCrossOrigin) {
+            const statusId = useCrossOrigin ? 'load2-status' : 'load1-status';
+            const logId = useCrossOrigin ? 'load2-log' : 'load1-log';
+            const previewId = useCrossOrigin ? 'load2-preview' : 'load1-preview';
+
+            if (!currentImageUrl) {
+                setStatus(statusId, '❌ No image URL available. Generate an image first.', 'error');
+                return;
+            }
+
+            setStatus(statusId, `Testing image load ${useCrossOrigin ? 'WITH' : 'WITHOUT'} crossOrigin...`, 'info');
+            document.getElementById(logId).textContent = '';
+            document.getElementById(previewId).innerHTML = '';
+
+            const img = new Image();
+            
+            if (useCrossOrigin) {
+                img.crossOrigin = 'anonymous';
+                log(logId, '🔧 Using crossOrigin="anonymous"');
+            } else {
+                log(logId, '🔧 NOT using crossOrigin');
+            }
+
+            img.onload = function() {
+                log(logId, `✅ Image loaded successfully!`);
+                log(logId, `📏 Dimensions: ${img.width}x${img.height}`);
+                log(logId, `🔗 Source: ${img.src}`);
+                
+                // Show preview
+                const preview = document.getElementById(previewId);
+                preview.innerHTML = `<img src="${img.src}" class="image-preview" alt="Generated image">`;
+                
+                setStatus(statusId, '✅ Image loaded successfully!', 'success');
+            };
+
+            img.onerror = function(error) {
+                log(logId, `❌ Image load failed!`);
+                log(logId, `❌ Error: ${error}`);
+                log(logId, `❌ This is likely a CORS issue!`);
+                
+                setStatus(statusId, '❌ Image load failed - likely CORS issue!', 'error');
+            };
+
+            log(logId, `🔄 Attempting to load: ${currentImageUrl}`);
+            img.src = currentImageUrl;
+        }
+
+        function testCanvasDrawing() {
+            const statusId = 'canvas-status';
+            const logId = 'canvas-log';
+            const previewId = 'canvas-preview';
+
+            if (!currentImageUrl) {
+                setStatus(statusId, '❌ No image URL available. Generate an image first.', 'error');
+                return;
+            }
+
+            setStatus(statusId, 'Testing canvas drawing...', 'info');
+            document.getElementById(logId).textContent = '';
+            document.getElementById(previewId).innerHTML = '';
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous'; // Same as our app
+            
+            img.onload = function() {
+                try {
+                    log(logId, `✅ Image loaded for canvas test`);
+                    
+                    // Create canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 300;
+                    canvas.height = 300;
+                    const ctx = canvas.getContext('2d');
+                    
+                    if (!ctx) {
+                        throw new Error('Could not get canvas context');
+                    }
+                    
+                    log(logId, `🖼️ Drawing image on canvas...`);
+                    
+                    // Draw the image
+                    ctx.drawImage(img, 0, 0, 300, 300);
+                    
+                    log(logId, `✅ Image drawn on canvas successfully!`);
+                    
+                    // Show canvas preview
+                    const preview = document.getElementById(previewId);
+                    preview.innerHTML = `<img src="${canvas.toDataURL()}" class="image-preview" alt="Canvas result">`;
+                    
+                    setStatus(statusId, '✅ Canvas drawing successful!', 'success');
+                    
+                } catch (error) {
+                    log(logId, `❌ Canvas drawing failed: ${error.message}`);
+                    setStatus(statusId, `❌ Canvas drawing failed: ${error.message}`, 'error');
+                }
+            };
+
+            img.onerror = function(error) {
+                log(logId, `❌ Image load failed for canvas test: ${error}`);
+                setStatus(statusId, '❌ Image load failed - CORS issue prevents canvas use!', 'error');
+            };
+
+            log(logId, `🔄 Loading image for canvas test: ${currentImageUrl}`);
+            img.src = currentImageUrl;
+        }
+    </script>
+</body>
+</html>

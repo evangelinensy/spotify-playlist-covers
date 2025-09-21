@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test React API Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Test React API Configuration</h1>
+        <p>This tests the exact same API configuration logic as the React app.</p>
+
+        <div class="test-section">
+            <h2>Test 1: API Configuration Logic</h2>
+            <p>Simulate the React app's API configuration logic.</p>
+            <button class="test-button" onclick="testAPIConfig()">Test API Config</button>
+            <div id="config-status"></div>
+            <div id="config-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: Test Each URL</h2>
+            <p>Test if each configured URL is reachable.</p>
+            <button class="test-button" onclick="testURLs()">Test All URLs</button>
+            <div id="url-status"></div>
+            <div id="url-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: Simulate React App Request</h2>
+            <p>Make the exact same request the React app would make.</p>
+            <button class="test-button" onclick="testReactRequest()">Test React Request</button>
+            <div id="request-status"></div>
+            <div id="request-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function testAPIConfig() {
+            const statusId = 'config-status';
+            const logId = 'config-log';
+
+            setStatus(statusId, 'Testing API configuration...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                // Simulate the exact same logic as the React app
+                log(logId, '🔧 Simulating React app API configuration...');
+                
+                // This is the exact same logic from dreamLayerAPI.ts constructor
+                const baseURL = 'http://localhost'; // process.env.REACT_APP_API_BASE_URL || 'http://localhost'
+                const txt2imgURL = `${baseURL}:5001/api/txt2img`;
+                const modelsURL = `${baseURL}:5002/api/models`;
+                const imagesURL = `${baseURL}:5001/api/images`;
+                
+                log(logId, `Base URL: ${baseURL}`);
+                log(logId, `Txt2Img URL: ${txt2imgURL}`);
+                log(logId, `Models URL: ${modelsURL}`);
+                log(logId, `Images URL: ${imagesURL}`);
+                
+                // Check if these URLs look correct
+                if (txt2imgURL === 'http://localhost:5001/api/txt2img') {
+                    log(logId, '✅ Txt2Img URL looks correct');
+                } else {
+                    log(logId, '❌ Txt2Img URL looks wrong');
+                }
+                
+                if (imagesURL === 'http://localhost:5001/api/images') {
+                    log(logId, '✅ Images URL looks correct');
+                } else {
+                    log(logId, '❌ Images URL looks wrong');
+                }
+                
+                setStatus(statusId, '✅ API configuration looks correct!', 'success');
+                
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ API configuration error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testURLs() {
+            const statusId = 'url-status';
+            const logId = 'url-log';
+
+            setStatus(statusId, 'Testing URL reachability...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            const urls = [
+                'http://localhost:5001/api/txt2img',
+                'http://localhost:5001/api/images',
+                'http://localhost:5002/api/models'
+            ];
+
+            for (const url of urls) {
+                try {
+                    log(logId, `🔍 Testing: ${url}`);
+                    const response = await fetch(url, { method: 'HEAD' });
+                    log(logId, `✅ ${url} - Status: ${response.status} ${response.statusText}`);
+                } catch (error) {
+                    log(logId, `❌ ${url} - Error: ${error.message}`);
+                }
+            }
+
+            setStatus(statusId, '✅ URL testing complete!', 'success');
+        }
+
+        async function testReactRequest() {
+            const statusId = 'request-status';
+            const logId = 'request-log';
+
+            setStatus(statusId, 'Testing React app request...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                const payload = {
+                    prompt: "vibrant energetic gradient disc, bold colors, dynamic transitions, electric blues, bright purples, neon accents, high contrast, energetic mood, modern digital art, circular vinyl disc, subtle noise texture, playful UI design, 300x300px, square, high quality, contemporary",
+                    negative_prompt: "hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                log(logId, '🚀 Making request to: http://localhost:5001/api/txt2img');
+                log(logId, `📦 Payload: ${JSON.stringify(payload, null, 2)}`);
+
+                const response = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                log(logId, `📡 Response status: ${response.status} ${response.statusText}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(logId, `📄 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error(`API Error: ${data.message || 'No images generated'}`);
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                const imageUrl = `http://localhost:5001/api/images/${generatedImageFilename}`;
+                
+                log(logId, `🖼️ Generated image: ${generatedImageFilename}`);
+                log(logId, `🔗 Image URL: ${imageUrl}`);
+
+                setStatus(statusId, '✅ React app request successful!', 'success');
+
+            } catch (error) {
+                log(logId, `❌ Error: ${error.message}`);
+                setStatus(statusId, `❌ React app request failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug React App Exact Behavior</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔬 Debug React App Exact Behavior</h1>
+        <p>This simulates the EXACT same behavior as the React app's dreamLayerAPI.</p>
+
+        <div class="test-section">
+            <h2>Test: React App DreamLayer API Simulation</h2>
+            <p>This uses the exact same configuration and logic as the React app.</p>
+            <button class="test-button" onclick="testReactAppExact()">Test React App Exact</button>
+            <div id="main-status"></div>
+            <div id="main-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // EXACT same configuration as React app
+        const baseURL = 'http://localhost';
+        const txt2imgURL = `${baseURL}:5001/api/txt2img`;
+        const imagesURL = `${baseURL}:5001/api/images`;
+
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testReactAppExact() {
+            const statusId = 'main-status';
+            const logId = 'main-log';
+
+            setStatus(statusId, 'Testing React app exact behavior...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                // Step 1: Simulate the exact same vibe selection
+                log(logId, '🎲 Step 1: Simulating vibe selection');
+                const vibes = ['Main Character', 'Healing Arc'];
+                const randomVibe = vibes[Math.floor(Math.random() * vibes.length)];
+                log(logId, `🎯 Selected vibe: ${randomVibe}`);
+
+                // Step 2: Simulate the exact same API configuration
+                log(logId, '🔧 Step 2: API Configuration (exact same as React app)');
+                log(logId, `Base URL: ${baseURL}`);
+                log(logId, `Txt2Img URL: ${txt2imgURL}`);
+                log(logId, `Images URL: ${imagesURL}`);
+
+                // Step 3: Simulate the exact same generateDiscCover method
+                log(logId, '🚀 Step 3: Calling generateDiscCover (exact same logic)');
+                
+                const prompts = {
+                    'Main Character': `vibrant energetic gradient disc, bold colors, dynamic transitions, electric blues, bright purples, neon accents, high contrast, energetic mood, modern digital art, circular vinyl disc, subtle noise texture, playful UI design, 300x300px, square, high quality, contemporary`,
+                    'Healing Arc': `softer gradient palette, calming tones, gentle blues, soft purples, muted greens, peaceful transitions, zen-like atmosphere, healing mood, modern digital art, circular vinyl disc, subtle noise texture, calming UI design, 300x300px, square, high quality, serene`
+                };
+
+                const negativePrompts = {
+                    'Main Character': 'hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn',
+                    'Healing Arc': 'hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn, dark, gloomy'
+                };
+
+                const prompt = prompts[randomVibe];
+                const negativePrompt = negativePrompts[randomVibe];
+                const enhancedPrompt = `${prompt}, inspired by "Test Playlist"`;
+
+                // Step 4: Make the exact same API call as React app
+                log(logId, '📞 Step 4: Making API call (exact same as React app)');
+                
+                const payload = {
+                    prompt: enhancedPrompt,
+                    negative_prompt: negativePrompt,
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                log(logId, `🌐 Making request to: ${txt2imgURL}`);
+                log(logId, `📦 Payload: ${JSON.stringify(payload, null, 2)}`);
+
+                const response = await fetch(txt2imgURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                log(logId, `📡 Response status: ${response.status} ${response.statusText}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(logId, `📄 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error(data.message || 'No images generated');
+                }
+
+                // Step 5: Simulate the exact same image URL creation
+                log(logId, '🔗 Step 5: Creating image URL (exact same as React app)');
+                const generatedImageFilename = data.generated_images[0].filename;
+                const generatedImageUrl = `${imagesURL}/${generatedImageFilename}`;
+                log(logId, `🖼️ Generated image filename: ${generatedImageFilename}`);
+                log(logId, `🔗 Generated image URL: ${generatedImageUrl}`);
+
+                // Step 6: Test image loading (this is where React app might fail)
+                log(logId, '🖼️ Step 6: Testing image loading');
+                const imageLoaded = await testImageLoad(generatedImageUrl);
+                
+                if (!imageLoaded.success) {
+                    throw new Error(`Image loading failed: ${imageLoaded.message}`);
+                }
+
+                log(logId, `✅ Image loaded successfully! Dimensions: ${imageLoaded.details}`);
+
+                // Step 7: Test compositing (this is where React app might fail)
+                log(logId, '🔄 Step 7: Testing compositing');
+                const compositingResult = await testCompositing(generatedImageUrl);
+                
+                if (!compositingResult.success) {
+                    throw new Error(`Compositing failed: ${compositingResult.message}`);
+                }
+
+                log(logId, `✅ Compositing successful! Final URL: ${compositingResult.finalImageUrl}`);
+
+                setStatus(statusId, '✅ React app exact simulation successful!', 'success');
+
+            } catch (error) {
+                log(logId, `❌ React app exact simulation failed: ${error.message}`);
+                log(logId, `❌ Error type: ${error.name}`);
+                log(logId, `❌ Error stack: ${error.stack}`);
+                
+                setStatus(statusId, `❌ React app exact simulation failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testImageLoad(imageUrl) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous'; // Same as React app
+                
+                img.onload = () => {
+                    resolve({
+                        success: true,
+                        message: 'Image loaded successfully',
+                        details: `${img.width}x${img.height}`
+                    });
+                };
+                
+                img.onerror = (error) => {
+                    resolve({
+                        success: false,
+                        message: 'Image loading failed',
+                        details: `CORS or network error: ${error}`
+                    });
+                };
+                
+                img.src = imageUrl;
+            });
+        }
+
+        async function testCompositing(generatedImageUrl) {
+            try {
+                // Load the generated image
+                const generatedImage = await loadImage(generatedImageUrl);
+                
+                // Load NewCDbackground (fallback to solid disc if not available)
+                let discBaseImage;
+                try {
+                    discBaseImage = await loadImage('/images/NewCDbackground.png');
+                } catch (error) {
+                    console.warn('NewCDbackground not found, creating solid disc');
+                    discBaseImage = createSolidDisc(300);
+                }
+
+                // Create canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = 300;
+                canvas.height = 300;
+                const ctx = canvas.getContext('2d');
+
+                if (!ctx) {
+                    throw new Error('Could not get canvas context');
+                }
+
+                // Draw disc base as background
+                ctx.drawImage(discBaseImage, 0, 0, 300, 300);
+
+                // Create circular mask for generated image
+                const centerX = 150;
+                const centerY = 150;
+                const outerRadius = 114; // 38% of 300
+                const innerRadius = 18; // 6% of 300
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+                ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
+                ctx.clip();
+
+                // Draw generated image on top
+                ctx.drawImage(generatedImage, 0, 0, 300, 300);
+                ctx.restore();
+
+                const finalImageUrl = canvas.toDataURL('image/png');
+
+                return {
+                    success: true,
+                    message: 'Compositing successful',
+                    details: `Final image size: ${canvas.width}x${canvas.height}`,
+                    finalImageUrl: finalImageUrl
+                };
+
+            } catch (error) {
+                return {
+                    success: false,
+                    message: 'Compositing failed',
+                    details: error.message
+                };
+            }
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        function createSolidDisc(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const outerRadius = size * 0.4;
+            const innerRadius = size * 0.08;
+
+            // Draw disc background
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, size, size);
+
+            // Draw disc
+            ctx.fillStyle = '#888888';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Draw center hole
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Convert to image
+            const img = new Image();
+            img.src = canvas.toDataURL();
+            return img;
+        }
+    </script>
+</body>
+</html>

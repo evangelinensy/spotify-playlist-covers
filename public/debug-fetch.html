@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Fetch Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .status.success { background: #2d5a2d; }
+        .status.error { background: #5a2d2d; }
+        .status.info { background: #2d4a5a; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🐛 Debug "Failed to fetch" Error</h1>
+        <p>This will help us identify exactly why the fetch request is failing.</p>
+
+        <div class="test-section">
+            <h2>Test 1: Basic Connectivity</h2>
+            <p>Test if we can reach the API at all.</p>
+            <button class="test-button" onclick="testBasicConnectivity()">Test Basic Connectivity</button>
+            <div id="basic-status"></div>
+            <div id="basic-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 2: CORS Preflight</h2>
+            <p>Test if CORS preflight request works.</p>
+            <button class="test-button" onclick="testCORSPreflight()">Test CORS Preflight</button>
+            <div id="cors-status"></div>
+            <div id="cors-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 3: Full Request (Same as React App)</h2>
+            <p>Make the exact same request the React app makes.</p>
+            <button class="test-button" onclick="testFullRequest()">Test Full Request</button>
+            <div id="full-status"></div>
+            <div id="full-log" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test 4: Network Information</h2>
+            <p>Check browser network capabilities and restrictions.</p>
+            <button class="test-button" onclick="testNetworkInfo()">Test Network Info</button>
+            <div id="network-status"></div>
+            <div id="network-log" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.scrollTop = element.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        async function testBasicConnectivity() {
+            const statusId = 'basic-status';
+            const logId = 'basic-log';
+
+            setStatus(statusId, 'Testing basic connectivity...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🔍 Testing basic connectivity to DreamLayer API...');
+                log(logId, '🌐 URL: http://localhost:5001/api/txt2img');
+                
+                // Test with HEAD request first
+                log(logId, '📡 Making HEAD request...');
+                const headResponse = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'HEAD',
+                    mode: 'cors'
+                });
+                
+                log(logId, `✅ HEAD request successful! Status: ${headResponse.status}`);
+                log(logId, `📋 Headers: ${JSON.stringify([...headResponse.headers.entries()], null, 2)}`);
+                
+                setStatus(statusId, '✅ Basic connectivity works!', 'success');
+                
+            } catch (error) {
+                log(logId, `❌ Basic connectivity failed: ${error.message}`);
+                log(logId, `❌ Error type: ${error.name}`);
+                log(logId, `❌ Error stack: ${error.stack}`);
+                
+                if (error.message.includes('Failed to fetch')) {
+                    log(logId, '🔍 "Failed to fetch" usually means:');
+                    log(logId, '   - Network connectivity issues');
+                    log(logId, '   - CORS policy blocking the request');
+                    log(logId, '   - Server not responding');
+                    log(logId, '   - DNS resolution issues');
+                    log(logId, '   - Firewall blocking the request');
+                }
+                
+                setStatus(statusId, `❌ Basic connectivity failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORSPreflight() {
+            const statusId = 'cors-status';
+            const logId = 'cors-log';
+
+            setStatus(statusId, 'Testing CORS preflight...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🔍 Testing CORS preflight request...');
+                
+                // Make a request that will trigger a preflight
+                const response = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                log(logId, `✅ CORS preflight successful! Status: ${response.status}`);
+                log(logId, `📋 CORS Headers:`);
+                log(logId, `   Access-Control-Allow-Origin: ${response.headers.get('Access-Control-Allow-Origin')}`);
+                log(logId, `   Access-Control-Allow-Methods: ${response.headers.get('Access-Control-Allow-Methods')}`);
+                log(logId, `   Access-Control-Allow-Headers: ${response.headers.get('Access-Control-Allow-Headers')}`);
+                
+                setStatus(statusId, '✅ CORS preflight works!', 'success');
+                
+            } catch (error) {
+                log(logId, `❌ CORS preflight failed: ${error.message}`);
+                log(logId, `❌ This suggests CORS is not properly configured`);
+                
+                setStatus(statusId, `❌ CORS preflight failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFullRequest() {
+            const statusId = 'full-status';
+            const logId = 'full-log';
+
+            setStatus(statusId, 'Testing full request...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🚀 Making full POST request (same as React app)...');
+                
+                const payload = {
+                    prompt: "vibrant energetic gradient disc, bold colors, dynamic transitions, electric blues, bright purples, neon accents, high contrast, energetic mood, modern digital art, circular vinyl disc, subtle noise texture, playful UI design, 300x300px, square, high quality, contemporary",
+                    negative_prompt: "hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn",
+                    model_name: "stable-diffusion-v1-5.safetensors",
+                    steps: 25,
+                    cfg: 6.5,
+                    width: 300,
+                    height: 300,
+                    batch_size: 1,
+                    seed: Math.floor(Math.random() * 1000000)
+                };
+
+                log(logId, `📦 Payload: ${JSON.stringify(payload, null, 2)}`);
+                
+                const response = await fetch('http://localhost:5001/api/txt2img', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                    mode: 'cors'
+                });
+
+                log(logId, `📡 Response status: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                log(logId, `📄 Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (data.status !== 'success' || !data.generated_images?.length) {
+                    throw new Error(`API Error: ${data.message || 'No images generated'}`);
+                }
+
+                const generatedImageFilename = data.generated_images[0].filename;
+                log(logId, `🖼️ Generated image: ${generatedImageFilename}`);
+
+                setStatus(statusId, '✅ Full request successful!', 'success');
+
+            } catch (error) {
+                log(logId, `❌ Full request failed: ${error.message}`);
+                log(logId, `❌ Error type: ${error.name}`);
+                
+                if (error.message.includes('Failed to fetch')) {
+                    log(logId, '🔍 "Failed to fetch" in full request suggests:');
+                    log(logId, '   - CORS policy is blocking the request');
+                    log(logId, '   - Server is not responding to POST requests');
+                    log(logId, '   - Network connectivity issues');
+                    log(logId, '   - Request payload is too large');
+                }
+                
+                setStatus(statusId, `❌ Full request failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testNetworkInfo() {
+            const statusId = 'network-status';
+            const logId = 'network-log';
+
+            setStatus(statusId, 'Checking network information...', 'info');
+            document.getElementById(logId).textContent = '';
+
+            try {
+                log(logId, '🌐 Browser Network Information:');
+                log(logId, `   User Agent: ${navigator.userAgent}`);
+                log(logId, `   Online Status: ${navigator.onLine ? 'Online' : 'Offline'}`);
+                log(logId, `   Protocol: ${window.location.protocol}`);
+                log(logId, `   Host: ${window.location.host}`);
+                log(logId, `   Origin: ${window.location.origin}`);
+                
+                log(logId, '🔧 Fetch API Support:');
+                log(logId, `   Fetch available: ${typeof fetch !== 'undefined' ? 'Yes' : 'No'}`);
+                log(logId, `   Promise available: ${typeof Promise !== 'undefined' ? 'Yes' : 'No'}`);
+                
+                log(logId, '🔒 Security Context:');
+                log(logId, `   Is Secure Context: ${window.isSecureContext ? 'Yes' : 'No'}`);
+                log(logId, `   Protocol: ${window.location.protocol}`);
+                
+                if (window.location.protocol === 'https:' && 'http://localhost:5001'.includes('http:')) {
+                    log(logId, '⚠️  WARNING: Mixed content detected!');
+                    log(logId, '   HTTPS page trying to access HTTP API');
+                    log(logId, '   This will be blocked by browsers');
+                }
+                
+                setStatus(statusId, '✅ Network information collected!', 'success');
+                
+            } catch (error) {
+                log(logId, `❌ Error collecting network info: ${error.message}`);
+                setStatus(statusId, `❌ Network info collection failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

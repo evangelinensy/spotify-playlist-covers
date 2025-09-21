@@ -12,9 +12,19 @@ interface GenerationState {
   moodAnalysis: any | null;
 }
 
-const PlaylistCoverGenerator: React.FC = () => {
-  const [spotifyUrl, setSpotifyUrl] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState<'gradients' | 'abstract' | 'nature'>('gradients');
+interface PlaylistCoverGeneratorProps {
+  onBackToOnboarding?: () => void;
+  playlistUrl?: string;
+  selectedStyle?: 'gradients' | 'abstract' | 'nature';
+}
+
+const PlaylistCoverGenerator: React.FC<PlaylistCoverGeneratorProps> = ({ 
+  onBackToOnboarding, 
+  playlistUrl: propPlaylistUrl,
+  selectedStyle: propSelectedStyle
+}) => {
+  const [spotifyUrl, setSpotifyUrl] = useState(propPlaylistUrl || '');
+  const [selectedStyle, setSelectedStyle] = useState<'gradients' | 'abstract' | 'nature'>(propSelectedStyle || 'gradients');
   const [generationState, setGenerationState] = useState<GenerationState>({
     isLoading: false,
     error: null,
@@ -97,6 +107,11 @@ const PlaylistCoverGenerator: React.FC = () => {
   return (
     <div className="playlist-cover-generator">
       <div className="header">
+        {onBackToOnboarding && (
+          <button className="back-button" onClick={onBackToOnboarding}>
+            ← Back to Intro
+          </button>
+        )}
         <h1>🎵 Spotify Playlist Cover Generator</h1>
         <p>Generate unique 300x300px disc covers for your Spotify playlists using AI</p>
       </div>

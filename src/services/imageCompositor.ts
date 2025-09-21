@@ -8,8 +8,7 @@ export interface CompositorOptions {
 }
 
 class ImageCompositor {
-  private defaultDiscBase: string = '/disc-bg-new.png'; // Disc base image in public folder
-  private plasticCoverImage: string = '/plastic-disc-cover.png'; // Plastic cover overlay
+  private defaultDiscBase: string = '/images/NewCDbackground.png'; // New CD background image
   private defaultOutputSize: number = 300;
 
   /**
@@ -78,18 +77,28 @@ class ImageCompositor {
     const { canvas, ctx } = this.createCanvas(outputSize);
 
     try {
-      // Load the generated image
+      // Load the generated image from DreamLayer API
+      console.log('🔄 Loading generated image from DreamLayer API:', generatedImageUrl);
       const generatedImage = await this.loadImage(generatedImageUrl);
-      
+      console.log('✅ Generated image loaded successfully, dimensions:', generatedImage.width, 'x', generatedImage.height);
+
       // Load disc base image (fallback to solid disc if not available)
       let discBaseImage: HTMLImageElement;
       
       try {
-        console.log('🔄 Attempting to load disc base from:', this.defaultDiscBase);
+        console.log('🔄 Attempting to load NewCDbackground from:', this.defaultDiscBase);
+        console.log('🔄 Full path should be:', window.location.origin + this.defaultDiscBase);
+        console.log('🔄 Current window location:', window.location.href);
+        console.log('🔄 Current window origin:', window.location.origin);
+        
         discBaseImage = await this.loadImage(this.defaultDiscBase);
-        console.log('✅ Disc base image loaded successfully, dimensions:', discBaseImage.width, 'x', discBaseImage.height);
+        console.log('✅ NewCDbackground loaded successfully!');
+        console.log('✅ Dimensions:', discBaseImage.width, 'x', discBaseImage.height);
+        console.log('✅ Image source:', discBaseImage.src);
       } catch (error) {
-        console.warn('❌ Disc base image not found, creating solid disc:', error);
+        console.warn('❌ NewCDbackground not found, creating solid disc:', error);
+        console.warn('❌ Error details:', error instanceof Error ? error.message : String(error));
+        console.warn('❌ This means the compositing will use a solid disc instead of NewCDbackground.png');
         discBaseImage = this.createSolidDisc(outputSize);
       }
 
@@ -98,11 +107,11 @@ class ImageCompositor {
       ctx.drawImage(discBaseImage, 0, 0, outputSize, outputSize);
       console.log('✅ Disc base drawn as background');
 
-      // Calculate disc area (excluding center hole) for the generated image
-      const centerX = (outputSize / 2) - 6; // Move 6px to the left (10px left - 4px right = 6px left from center)
-      const centerY = outputSize / 2;
-      const outerRadius = (outputSize * 0.42); // 84% of half size (larger to fill more of the disc)
-      const innerRadius = (outputSize * 0.08); // 16% of half size (center hole)
+      // Calculate disc area for the generated image (centered on NewCDbackground)
+      const centerX = (outputSize / 2) - 8; // Center horizontally, moved 8px to the left
+      const centerY = outputSize / 2; // Center vertically
+      const outerRadius = (outputSize * 0.42); // 84% of half size - bigger disc area
+      const innerRadius = (outputSize * 0.06); // 12% of half size - smaller center hole
 
       // Create circular mask for the generated image to sit on top of the disc
       ctx.save();
@@ -111,31 +120,10 @@ class ImageCompositor {
       ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true); // Inner hole (counter-clockwise)
       ctx.clip();
 
-      // Draw the generated image ON TOP of the disc base
-      ctx.drawImage(generatedImage, 0, 0, outputSize, outputSize);
+      // Draw the generated image ON TOP of the disc base, positioned to match the circular mask
+      ctx.drawImage(generatedImage, -8, 0, outputSize, outputSize); // Move 8px to the left to match centerX
 
       ctx.restore();
-
-      // Randomly add plastic cover overlay (40% chance for variety)
-      const shouldAddPlasticCover = Math.random() < 0.4;
-      console.log(`🎲 Random plastic cover decision: ${shouldAddPlasticCover ? 'YES' : 'NO'} (40% chance)`);
-      
-      if (shouldAddPlasticCover) {
-        try {
-          console.log('🔄 Adding plastic cover overlay...');
-          const plasticCover = await this.loadImage(this.plasticCoverImage);
-          console.log('✅ Plastic cover loaded, drawing overlay');
-          ctx.drawImage(plasticCover, 0, 0, outputSize, outputSize);
-          console.log('✨ Applied plastic cover overlay for realistic disc effect');
-        } catch (error) {
-          console.warn('❌ Plastic cover image not found, creating fallback effect:', error);
-          // Create a simple plastic effect if image is not available
-          this.addSimplePlasticEffect(ctx, outputSize);
-          console.log('✨ Applied fallback plastic effect');
-        }
-      } else {
-        console.log('📀 Using standard disc without plastic overlay');
-      }
 
       // Add a subtle border to make the disc more visible
       ctx.strokeStyle = '#666666';
@@ -144,8 +132,15 @@ class ImageCompositor {
       ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
       ctx.stroke();
 
+      console.log('✅ Generated image drawn on top of disc base');
+      console.log('📀 Using clean disc without plastic overlay');
+
       // Return the composite image as data URL
-      return canvas.toDataURL('image/png');
+      const finalDataURL = canvas.toDataURL('image/png');
+      console.log('✅ Final composite image created successfully!');
+      console.log('✅ Data URL length:', finalDataURL.length);
+      console.log('✅ Data URL preview:', finalDataURL.substring(0, 100) + '...');
+      return finalDataURL;
 
     } catch (error) {
       console.error('Error compositing disc cover:', error);
@@ -195,48 +190,6 @@ class ImageCompositor {
     return img;
   }
 
-  /**
-   * Add a simple plastic effect overlay
-   */
-  private addSimplePlasticEffect(ctx: CanvasRenderingContext2D, size: number): void {
-    // Create plastic reflection effect
-    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); // Center highlight
-    gradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.05)'); // Mid highlight
-    gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.1)'); // Mid shadow
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)'); // Edge shadow
-    
-    // Draw circular plastic effect
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    // Add subtle texture lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.lineWidth = 1;
-    
-    // Draw concentric circles for texture
-    for (let i = 1; i <= 5; i++) {
-      const radius = (size / 2 / 5) * i;
-      ctx.beginPath();
-      ctx.arc(size/2, size/2, radius, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
-    
-    // Add center hole highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size * 0.08, 0, 2 * Math.PI);
-    ctx.fill();
-    
-    // Add rim highlight
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
-    ctx.stroke();
-  }
 
   /**
    * Download the composite image

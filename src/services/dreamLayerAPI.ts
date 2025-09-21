@@ -37,10 +37,10 @@ export interface ModelsResponse {
 }
 
 class DreamLayerAPI {
-  private baseURL: string;
-  private txt2imgURL: string;
-  private modelsURL: string;
-  private imagesURL: string;
+  public baseURL: string;
+  public txt2imgURL: string;
+  public modelsURL: string;
+  public imagesURL: string;
 
   constructor(baseURL?: string) {
     // Use environment variable or fallback to localhost for development
@@ -48,6 +48,13 @@ class DreamLayerAPI {
     this.txt2imgURL = `${this.baseURL}:5001/api/txt2img`;
     this.modelsURL = `${this.baseURL}:5002/api/models`;
     this.imagesURL = `${this.baseURL}:5001/api/images`;
+    
+    console.log('🔧 DreamLayer API initialized with URLs:', {
+      baseURL: this.baseURL,
+      txt2imgURL: this.txt2imgURL,
+      imagesURL: this.imagesURL,
+      envVar: process.env.REACT_APP_API_BASE_URL
+    });
   }
 
   /**
@@ -93,6 +100,9 @@ class DreamLayerAPI {
     };
 
     try {
+      console.log('🌐 Making API call to:', this.txt2imgURL);
+      console.log('📦 Payload being sent:', payload);
+      
       const response = await fetch(this.txt2imgURL, {
         method: 'POST',
         headers: {
@@ -101,10 +111,13 @@ class DreamLayerAPI {
         body: JSON.stringify(payload),
       });
 
+      console.log('📡 API Response status:', response.status);
       const data: GenerationResponse = await response.json();
+      console.log('📄 API Response data:', data);
+      
       return data;
     } catch (error) {
-      console.error('Error generating image:', error);
+      console.error('❌ Error generating image:', error);
       throw error;
     }
   }
@@ -130,6 +143,46 @@ class DreamLayerAPI {
       console.error('Error downloading image:', error);
       throw error;
     }
+  }
+
+  /**
+   * Generate disc cover image specifically for NewCDbackground compositing
+   */
+  async generateDiscCover(
+    vibe: 'Main Character' | 'Healing Arc',
+    mood: string,
+    playlistName?: string
+  ): Promise<GenerationResponse> {
+    // Vibe-specific prompts for disc generation
+    const prompts = {
+      'Main Character': `vibrant energetic gradient disc, bold colors, dynamic transitions, electric blues, bright purples, neon accents, high contrast, energetic mood, modern digital art, circular vinyl disc, subtle noise texture, playful UI design, 300x300px, square, high quality, contemporary`,
+      'Healing Arc': `softer gradient palette, calming tones, gentle blues, soft purples, muted greens, peaceful transitions, zen-like atmosphere, healing mood, modern digital art, circular vinyl disc, subtle noise texture, calming UI design, 300x300px, square, high quality, serene`
+    };
+
+    const negativePrompts = {
+      'Main Character': 'hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn',
+      'Healing Arc': 'hard edges, sharp lines, geometric patterns, text, logos, borders, frames, blocks, tiles, mosaic, checkerboard, stripes, lines, sharp transitions, defined areas, sections, compartments, solid colors, flat colors, uniform colors, square composition, rectangular, vintage, film grain, old, worn, dark, gloomy'
+    };
+
+    const prompt = prompts[vibe];
+    const negativePrompt = negativePrompts[vibe];
+    
+    if (playlistName) {
+      const enhancedPrompt = `${prompt}, inspired by "${playlistName}"`;
+      return this.generateImage({ 
+        prompt: enhancedPrompt,
+        negative_prompt: negativePrompt,
+        width: 300,
+        height: 300
+      });
+    }
+
+    return this.generateImage({ 
+      prompt,
+      negative_prompt: negativePrompt,
+      width: 300,
+      height: 300
+    });
   }
 
   /**
