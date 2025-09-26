@@ -44,4 +44,5 @@ export const ShinyButton: React.FC<ShinyButtonProps> = ({
   );
 };
 
-export default { ShinyButton };
+const ShinyButtonComponent = ShinyButton;
+export default ShinyButtonComponent;

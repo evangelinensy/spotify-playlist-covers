@@ -8,20 +8,23 @@ import { ShinyButton } from "./ui/shiny-button"
 interface VibeRecommendationProps {
   onVibeSelect: (vibe: string) => void;
   onBack: () => void;
+  microcopy?: string;
 }
 
-const VibeRecommendation: React.FC<VibeRecommendationProps> = ({ onVibeSelect, onBack }) => {
+const VibeRecommendation: React.FC<VibeRecommendationProps> = ({ onVibeSelect, onBack, microcopy }) => {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
-  const vibes = [
-    {
-      name: "Main Character",
-      glowColor: "purple" as const
-    },
-    {
-      name: "Healing Arc", 
-      glowColor: "green" as const
-    }
-  ]
+  
+      // Always show the same 2 themes
+      const vibes = [
+        {
+          name: "Main Character",
+          glowColor: "purple" as const
+        },
+        {
+          name: "Healing Arc", 
+          glowColor: "green" as const
+        }
+      ]
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -43,6 +46,16 @@ const VibeRecommendation: React.FC<VibeRecommendationProps> = ({ onVibeSelect, o
           <h1 className="text-4xl font-calendas italic text-white mb-4">
             We listened. Your playlist cover is calling. Which one are you picking up?
           </h1>
+          {microcopy && (
+            <motion.p 
+              className="text-gray-300 text-lg italic max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              {microcopy}
+            </motion.p>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 justify-items-center">
@@ -66,8 +79,8 @@ const VibeRecommendation: React.FC<VibeRecommendationProps> = ({ onVibeSelect, o
                 }`}
                 onClick={() => setSelectedVibe(vibe.name)}
               >
-                <div className="flex flex-col items-center justify-center text-center h-full">
-                  <h3 className="text-3xl font-calendas font-bold text-white">
+                <div className="flex flex-col items-center justify-center text-center h-full p-6">
+                  <h3 className="text-2xl font-calendas font-bold text-white">
                     {vibe.name}
                   </h3>
                 </div>

@@ -61,7 +61,7 @@ const SpotifyUrlInput: React.FC<SpotifyUrlInputProps> = ({ onUrlSubmit, onBack }
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex justify-center">
             <div className="relative">
               <input
@@ -93,6 +93,7 @@ const SpotifyUrlInput: React.FC<SpotifyUrlInputProps> = ({ onUrlSubmit, onBack }
               </div>
             </div>
           </div>
+
 
           {error && (
             <motion.div

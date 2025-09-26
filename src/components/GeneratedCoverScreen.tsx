@@ -16,6 +16,7 @@ interface GeneratedCoverScreenProps {
   coverImage: string;
   vibe: string;
   playlistAnalysis: any;
+  microcopy?: string;
   onDownload: () => void;
   onBack: () => void;
   onGenerateNew: () => void;
@@ -25,6 +26,7 @@ const GeneratedCoverScreen: React.FC<GeneratedCoverScreenProps> = ({
   coverImage, 
   vibe, 
   playlistAnalysis, 
+  microcopy,
   onDownload, 
   onBack,
   onGenerateNew
@@ -72,7 +74,7 @@ const GeneratedCoverScreen: React.FC<GeneratedCoverScreenProps> = ({
             Woah. This cover gets you.
           </h1>
           <p className="text-gray-300">
-            Change your Spotify Playlist Cover.
+            {microcopy || "Change your Spotify Playlist Cover."}
           </p>
         </div>
 

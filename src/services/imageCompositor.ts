@@ -5,6 +5,8 @@ export interface CompositorOptions {
   discBaseImage?: HTMLImageElement;
   generatedImage?: HTMLImageElement;
   outputSize?: number;
+  playlistName?: string;
+  vibe?: 'Main Character' | 'Healing Arc';
 }
 
 class ImageCompositor {
@@ -120,8 +122,17 @@ class ImageCompositor {
       ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true); // Inner hole (counter-clockwise)
       ctx.clip();
 
-      // Draw the generated image ON TOP of the disc base, positioned to match the circular mask
-      ctx.drawImage(generatedImage, -8, 0, outputSize, outputSize); // Move 8px to the left to match centerX
+      // Draw the generated image ON TOP of the disc base, scaled to completely fill the disc area
+      // Calculate the scale factor to ensure the image completely covers the disc area
+      const scaleFactor = Math.max(outputSize / generatedImage.width, outputSize / generatedImage.height);
+      const scaledWidth = generatedImage.width * scaleFactor;
+      const scaledHeight = generatedImage.height * scaleFactor;
+      
+      // Center the scaled image on the disc
+      const imageX = centerX - (scaledWidth / 2);
+      const imageY = centerY - (scaledHeight / 2);
+      
+      ctx.drawImage(generatedImage, imageX, imageY, scaledWidth, scaledHeight);
 
       ctx.restore();
 
@@ -131,6 +142,8 @@ class ImageCompositor {
       ctx.beginPath();
       ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI);
       ctx.stroke();
+
+      // No text overlays - keeping images clean and text-free
 
       console.log('✅ Generated image drawn on top of disc base');
       console.log('📀 Using clean disc without plastic overlay');
@@ -210,6 +223,7 @@ class ImageCompositor {
     const response = await fetch(dataUrl);
     return response.blob();
   }
+
 }
 
 const imageCompositor = new ImageCompositor();

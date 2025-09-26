@@ -7,7 +7,7 @@ import VibeCheckLoading from './components/VibeCheckLoading';
 import CoverGenerationLoading from './components/CoverGenerationLoading';
 import GeneratedCoverScreen from './components/GeneratedCoverScreen';
 import dreamLayerAPI from './services/dreamLayerAPI';
-import spotifyAnalyzer from './services/spotifyAnalyzer';
+import spotifyAPI from './services/spotifyAPI';
 import imageCompositor from './services/imageCompositor';
 import './App.css';
 
@@ -20,6 +20,7 @@ function App() {
   const [generatedImage, setGeneratedImage] = useState<string>('');
   const [playlistAnalysis, setPlaylistAnalysis] = useState<any>(null);
   const [loadingStep, setLoadingStep] = useState<string>('Vibe detected. Cover assembling…');
+  const [playlistMicrocopy, setPlaylistMicrocopy] = useState<string>('');
 
   // Debug: Log current step changes
   useEffect(() => {
@@ -31,18 +32,58 @@ function App() {
     document.documentElement.setAttribute('data-theme', 'dark');
   }, []);
 
+
   const handleGetStarted = () => {
     setCurrentStep('url-input');
   };
 
-  const handleUrlSubmit = (url: string) => {
+  const handleUrlSubmit = async (url: string) => {
     setPlaylistUrl(url);
     setCurrentStep('vibe-loading');
     
-    // Simulate vibe-check loading, then move to recommendations
-    setTimeout(() => {
-      setCurrentStep('vibe-recommendation');
-    }, 3000);
+    try {
+      console.log('🔍 Analyzing playlist URL:', url);
+      
+      // Always use basic playlist analysis
+      setLoadingStep('Analyzing playlist mood...');
+      console.log('🔍 Using basic playlist analysis');
+      const basicAnalysis = await spotifyAPI.getBasicPlaylistAnalysis(url);
+      console.log('📊 Basic analysis complete:', basicAnalysis);
+      
+      // Generate cheeky microcopy based on playlist data
+      const microcopy = spotifyAPI.generateMicrocopy(basicAnalysis);
+      setPlaylistMicrocopy(microcopy);
+      console.log('💬 Generated microcopy:', microcopy);
+      
+      // Convert basic analysis to the expected format
+      const analysisResult = {
+        playlist: {
+          name: basicAnalysis.name,
+          tracks: [], // Basic analysis doesn't provide track details
+          genres: []
+        },
+        moodAnalysis: {
+          primaryMood: basicAnalysis.estimatedMood || 'calm',
+          confidence: 0.5,
+          keywords: basicAnalysis.basicSubjects,
+          colorPalette: ['neutral colors']
+        },
+        promptVariance: basicAnalysis.basicSubjects.join(', ')
+      };
+      setPlaylistAnalysis(analysisResult);
+      
+      // Move to recommendations after analysis
+      setTimeout(() => {
+        setCurrentStep('vibe-recommendation');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('❌ Error analyzing playlist:', error);
+      // Fallback to basic flow
+      setTimeout(() => {
+        setCurrentStep('vibe-recommendation');
+      }, 3000);
+    }
   };
 
   const handleVibeSelect = async (vibe: string) => {
@@ -54,12 +95,11 @@ function App() {
     try {
       console.log('🎯 Selected vibe:', vibe);
       
-      // Analyze the playlist to get mood and keywords
-      setLoadingStep('Analyzing playlist mood...');
-      console.log('🔍 Analyzing playlist URL:', playlistUrl);
-      const analysisResult = await spotifyAnalyzer.analyzePlaylist(playlistUrl);
-      setPlaylistAnalysis(analysisResult);
-      console.log('📊 Playlist analysis complete:', analysisResult);
+      // Use the analysis result we already have from handleUrlSubmit
+      const analysisResult = playlistAnalysis;
+      if (!analysisResult) {
+        throw new Error('No playlist analysis available');
+      }
       
       // Generate the disc image using new disc generation method
       setLoadingStep('Generating disc artwork...');
@@ -69,10 +109,22 @@ function App() {
         playlistName: analysisResult.playlist.name
       });
       
+      // Add debug logging to verify prompts are being used
+      console.log('🎯 Using updated prompts for vibe:', vibe);
+      if (vibe === 'Main Character') {
+        console.log('🎨 Main Character prompt includes: "Abstract symmetrical composition, fluid art, biomorphic forms"');
+      } else if (vibe === 'Healing Arc') {
+        console.log('🎨 Healing Arc prompt includes: "An ethereal seascape, moody landscape, silhouetted coastline"');
+      }
+      
       const generationResponse = await dreamLayerAPI.generateDiscCover(
         vibe as 'Main Character' | 'Healing Arc',
         analysisResult.moodAnalysis.primaryMood || 'calm',
-        analysisResult.playlist.name
+        analysisResult.playlist.name,
+        {
+          tracks: analysisResult.playlist.tracks,
+          genres: analysisResult.playlist.genres
+        }
       );
       
       console.log('🎨 DreamLayer API Response:', generationResponse);
@@ -92,7 +144,11 @@ function App() {
       setLoadingStep('Compositing disc with NewCDbackground...');
       console.log('🔄 Starting compositing with generatedImageUrl:', generatedImageUrl);
       const finalImageUrl = await imageCompositor.compositeDiscCover(
-        generatedImageUrl
+        generatedImageUrl,
+        {
+          playlistName: analysisResult.playlist.name,
+          vibe: vibe as 'Main Character' | 'Healing Arc'
+        }
       );
       console.log('✅ Compositing complete, finalImageUrl:', finalImageUrl);
       
@@ -155,6 +211,7 @@ function App() {
         <VibeRecommendation 
           onVibeSelect={handleVibeSelect}
           onBack={handleBackToUrlInput}
+          microcopy={playlistMicrocopy}
         />
       )}
       {currentStep === 'cover-loading' && (
@@ -169,6 +226,7 @@ function App() {
           coverImage={generatedImage}
           vibe={selectedVibe}
           playlistAnalysis={playlistAnalysis}
+          microcopy={playlistMicrocopy}
           onDownload={() => {
             // Create download functionality
             const downloadImage = () => {
